@@ -9,11 +9,8 @@ app.secret_key = "diploma"
 
 @app.route('/', methods=['GET', 'POST'])
 def login():
-    #return 'It is a testing example'
-    if request.method == 'POST':
-        return redirect(url_for('registration'))
-    else:
-        return render_template('index.html')
+    # return 'It is a testing example'
+    return render_template('index.html')
 
 @app.route('/registration', methods=['GET', 'POST'])
 def registration():
