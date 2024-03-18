@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Реєстрація</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f2f2f2;
+      margin: 0;
+      padding: 0;
+    }
+
+    h1 {
+      text-align: center;
+      margin-top: 50px;
+    }
+
+    form {
+      max-width: 400px;
+      margin: 0 auto;
+      background-color: #fff;
+      padding: 20px;
+      border-radius: 5px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    label {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+    input[type="text"],
+    input[type="file"] {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 20px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      box-sizing: border-box;
+    }
+
+    button[type="submit"] {
+      background-color: #007bff;
+      color: #fff;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      margin: 0 auto;
+    }
+
+    button[type="submit"]:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Форма реєстрації</h1>
+  <form id="registrationForm" action="/register" method="post" enctype="multipart/form-data">
+    <label for="surname">Прізвище:</label><br>
+    <input type="text" id="surname" name="surname"><br><br>
+    <label for="name">Ім'я:</label><br>
+    <input type="text" id="name" name="name"><br><br>
+    <label for="photo">Фото:</label><br>
+    <input type="file" id="photo" name="photo" accept="image/*"><br><br>
+    <button type="submit">Зареєструватися</button>
+  </form>
+</body>
+
+<script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-database.js"></script>
+<script>
+  // Ініціалізуйте Firebase з вашими конфігураційними даними
+  const firebaseConfig = {
+      apiKey: "AIzaSyCL8IwdrgI1JYAnv-LIsBQoIvYpiqTDhHo",
+      authDomain: "test-d450b.firebaseapp.com",
+      databaseURL: "https://test-d450b-default-rtdb.europe-west1.firebasedatabase.app",
+      projectId: "test-d450b",
+      storageBucket: "test-d450b.appspot.com",
+      messagingSenderId: "162411962655",
+      appId: "1:162411962655:web:5b638698d7f35b07d5502a"
+    };
+
+  // Ініціалізуйте Firebase
+  firebase.initializeApp(firebaseConfig);
+  const database = firebase.database();
+</script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const form = document.getElementById('registrationForm');
+
+    form.addEventListener('submit', function (event) {
+      event.preventDefault(); // Перешкоджаємо стандартній поведінці форми
+
+      // Отримуємо дані з форми
+      const surname = form.querySelector('#surname').value;
+      const name = form.querySelector('#name').value;
+      const photo = form.querySelector('#photo').files[0];
+
+      // Відправляємо дані до Firebase
+      const userDataRef = database.ref('users').push();
+      const newUser = {
+        surname: surname,
+        name: name
+      };
+
+      // Використовуйте метод put() для збереження файлу у Firebase Storage
+      const storageRef = firebase.storage().ref();
+      const photoRef = storageRef.child('photos/' + photo.name);
+      photoRef.put(photo).then(function (snapshot) {
+        console.log('Uploaded a blob or file!');
+        // Отримайте URL-адресу завантаженого файлу
+        photoRef.getDownloadURL().then(function (url) {
+          newUser.photoUrl = url;
+          // Збережіть дані користувача у базі даних Firebase
+          userDataRef.set(newUser);
+        });
+      }).catch(function (error) {
+        console.error('Error uploading file:', error);
+      });
+    });
+  });
+</script>
+
+
+
+
+</html>

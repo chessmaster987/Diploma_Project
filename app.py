@@ -8,15 +8,16 @@ app.secret_key = "diploma"
 
 
 @app.route('/', methods=['GET', 'POST'])
-def test():
+def login():
     #return 'It is a testing example'
-    return render_template('index.html')
+    if request.method == 'POST':
+        return redirect(url_for('registration'))
+    else:
+        return render_template('index.html')
 
-
-
-
-
-
+@app.route('/registration', methods=['GET', 'POST'])
+def registration():
+    return render_template('registration.html')
 
 '''
 cred = credentials.Certificate(
