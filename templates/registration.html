@@ -43,6 +43,10 @@
       box-sizing: border-box;
     }
 
+    #video {
+      width: 100%;
+    }
+
     button[type="submit"] {
       background-color: #007bff;
       color: #fff;
@@ -62,15 +66,42 @@
 
 <body>
   <h1>Форма реєстрації</h1>
-  <form action="/register" method="post" enctype="multipart/form-data">
-    <label for="surname">Прізвище:</label><br>
+  <form action="/register" method="post" enctype="multipart/form-data" id="registrationForm">
+    <label for="surname">ПІБ:</label><br>
     <input type="text" id="surname" name="surname"><br><br>
-    <label for="name">Ім'я:</label><br>
+    <label for="name">Ім'я для ідентифікації:</label><br>
     <input type="text" id="name" name="name"><br><br>
     <label for="photo">Фото:</label><br>
-    <input type="file" id="photo" name="photo" accept="image/*"><br><br>
-    <button type="submit">Зареєструватися</button>
+    <video id="video" autoplay playsinline></video><br><br>
+    <canvas id="canvas" width="640" height="480" style="display:none;"></canvas>
+    <button type="submit" onclick="capturePhoto()">Зареєструватися</button>
   </form>
+
+  <script>
+    var video = document.getElementById('video');
+    var canvas = document.getElementById('canvas');
+    var context = canvas.getContext('2d');
+
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+      navigator.mediaDevices.getUserMedia({
+        video: true
+      }).then(function (stream) {
+        video.srcObject = stream;
+        video.play();
+      });
+    }
+
+    function capturePhoto() {
+      context.drawImage(video, 0, 0, canvas.width, canvas.height);
+      var photo = canvas.toDataURL('image/jpeg');
+      var xhr = new XMLHttpRequest();
+      xhr.open('POST', '/save_photo', true);
+      xhr.setRequestHeader('Content-Type', 'application/json');
+      xhr.send(JSON.stringify({
+        photo_data: photo
+      }));
+    }
+  </script>
 </body>
 
 </html>

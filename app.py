@@ -1,48 +1,64 @@
-import firebase_admin
-from firebase_admin import credentials
-from firebase_admin import firestore
-from flask import Flask, session, render_template, request, redirect, url_for, flash
+import cv2
+import os
+from flask import Flask, Response, render_template, request, redirect, url_for
+import base64
 
 app = Flask(__name__)
-app.secret_key = "diploma"
+
+camera = cv2.VideoCapture(0)
 
 
-@app.route('/', methods=['GET', 'POST'])
+def generate_frames():
+    while True:
+        success, frame = camera.read()
+        if not success:
+            break
+        else:
+            ret, buffer = cv2.imencode('.jpg', frame)
+            frame = buffer.tobytes()
+            yield (b'--frame\r\n'
+                   b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+
+
+@app.route('/')
 def login():
-    # return 'It is a testing example'
     return render_template('index.html')
+
 
 @app.route('/registration', methods=['GET', 'POST'])
 def registration():
     return render_template('registration.html')
 
-'''
-cred = credentials.Certificate(
-    "test-d450b-firebase-adminsdk-5y2qa-79be3097eb.json")
-firebase_admin.initialize_app(cred)
 
-db = firestore.client()
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    return redirect(url_for('login'))
 
-Obj1 = {
-    'Name': 'Mike',
-    'Age': 25,
-    'Gender': 'M'
-}
 
-Obj2 = {
-    'Name': 'Alice',
-    'Age': 15,
-    'Gender': 'F'
-}
+@app.route('/video_feed')
+def video_feed():
+    return Response(generate_frames(), mimetype='multipart/x-mixed-replace; boundary=frame')
 
-data = [Obj1, Obj2]
 
-print(data)
+@app.route('/save_photo', methods=['POST'])
+def save_photo():
+    data = request.get_json()
+    photo_data = data['photo_data']
 
-for record in data:
-    doc_ref = db.collection(u'Users').document(record['Name'])
-    doc_ref.set(record)
-'''
+    # Decode base64 data
+    photo_data = base64.b64decode(photo_data)
+
+    # Save photo as JPEG file
+    save_path = 'photos'
+    if not os.path.exists(save_path):
+        os.makedirs(save_path)
+
+    photo_path = os.path.join(save_path, 'photo.jpg')
+    with open(photo_path, 'wb') as f:
+        f.write(photo_data)
+
+    return 'Photo saved successfully'
+
 
 if __name__ == '__main__':
     app.run(debug=True)
