@@ -47,7 +47,7 @@
       width: 100%;
     }
 
-    button[type="submit"] {
+    button[type="button"] {
       background-color: #007bff;
       color: #fff;
       padding: 10px 20px;
@@ -58,7 +58,7 @@
       margin: 0 auto;
     }
 
-    button[type="submit"]:hover {
+    button[type="button"]:hover {
       background-color: #0056b3;
     }
   </style>
@@ -66,7 +66,7 @@
 
 <body>
   <h1>Форма реєстрації</h1>
-  <form action="/register" method="post" enctype="multipart/form-data" id="registrationForm">
+  <form id="registrationForm">
     <label for="surname">ПІБ:</label><br>
     <input type="text" id="surname" name="surname"><br><br>
     <label for="name">Ім'я для ідентифікації:</label><br>
@@ -74,7 +74,7 @@
     <label for="photo">Фото:</label><br>
     <video id="video" autoplay playsinline></video><br><br>
     <canvas id="canvas" width="640" height="480" style="display:none;"></canvas>
-    <button type="submit" onclick="capturePhoto()">Зареєструватися</button>
+    <button type="button" onclick="capturePhoto()">Зареєструватися</button>
   </form>
 
   <script>
@@ -97,6 +97,11 @@
       var xhr = new XMLHttpRequest();
       xhr.open('POST', '/save_photo', true);
       xhr.setRequestHeader('Content-Type', 'application/json');
+      xhr.onreadystatechange = function () {
+        if (xhr.readyState === 4 && xhr.status === 200) {
+          alert('Photo saved successfully');
+        }
+      };
       xhr.send(JSON.stringify({
         photo_data: photo
       }));

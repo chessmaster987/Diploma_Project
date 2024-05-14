@@ -45,6 +45,9 @@ def save_photo():
     data = request.get_json()
     photo_data = data['photo_data']
 
+    # Remove the "data:image/jpeg;base64," prefix
+    photo_data = photo_data.split(",")[1]
+
     # Decode base64 data
     photo_data = base64.b64decode(photo_data)
 
