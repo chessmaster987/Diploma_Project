@@ -92,6 +92,15 @@
     }
 
     function capturePhoto() {
+      var nameInput = document.getElementById('name');
+      var surnameInput = document.getElementById('surname');
+      var userName = nameInput.value.trim();
+      var surname = surnameInput.value.trim();
+      if (userName === "" || surname === "") {
+        alert("Будь ласка, введіть і ім'я для ідентифікації, і ПІБ.");
+        return;
+      }
+
       context.drawImage(video, 0, 0, canvas.width, canvas.height);
       var photo = canvas.toDataURL('image/jpeg');
       var xhr = new XMLHttpRequest();
@@ -99,11 +108,13 @@
       xhr.setRequestHeader('Content-Type', 'application/json');
       xhr.onreadystatechange = function () {
         if (xhr.readyState === 4 && xhr.status === 200) {
-          alert('Photo saved successfully');
+          alert('Фото збережено успішно');
         }
       };
       xhr.send(JSON.stringify({
-        photo_data: photo
+        photo_data: photo,
+        user_name: userName,
+        surname: surname
       }));
     }
   </script>

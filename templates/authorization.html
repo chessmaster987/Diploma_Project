@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Перевірка Реєстрації</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f2f2f2;
+      margin: 0;
+      padding: 0;
+    }
+
+    h1 {
+      text-align: center;
+      margin-top: 50px;
+    }
+
+    #videoContainer {
+      max-width: 640px;
+      margin: 0 auto;
+      text-align: center;
+    }
+
+    #video {
+      width: 100%;
+      border: 1px solid #ccc;
+    }
+
+    #photoName {
+      margin-top: 20px;
+      font-size: 18px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Перевірка Реєстрації</h1>
+  <div id="videoContainer">
+    <video id="video" autoplay playsinline></video>
+    <div id="photoName"></div>
+  </div>
+
+  <script>
+    var video = document.getElementById('video');
+    var photoName = document.getElementById('photoName');
+
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+      navigator.mediaDevices.getUserMedia({
+        video: true
+      }).then(function (stream) {
+        video.srcObject = stream;
+        video.play();
+      });
+    }
+
+    var xhr = new XMLHttpRequest();
+    xhr.open('GET', '/video_feed_with_faces', true);
+    xhr.responseType = 'blob';
+    xhr.onload = function () {
+      if (xhr.status === 200) {
+        var url = URL.createObjectURL(xhr.response);
+        video.src = url;
+      }
+    };
+    xhr.send();
+
+    // Here you should set the name of the last saved photo to the photoName element
+    // Assuming you can retrieve this information somehow
+    // For now, we will set it manually for demonstration
+    photoName.innerText = "Ім'я для ідентифікації - ПІБ.jpg";  // Replace with dynamic data
+  </script>
+</body>
+
+</html>
