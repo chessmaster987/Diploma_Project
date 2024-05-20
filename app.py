@@ -81,7 +81,7 @@ def save_photo():
 
 @app.route('/verify_registration')
 def verify_registration():
-    return render_template('authorization.html')
+    return render_template('verify.html')
 
 if __name__ == '__main__':
     app.run(debug=True)
