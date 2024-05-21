@@ -5,6 +5,8 @@ from datetime import datetime
 import threading
 import tkinter as tk
 from tkinter import messagebox
+from os.path import getmtime
+from time import time
 import os
 from flask import Flask, session, Response, render_template, request, redirect, url_for, jsonify
 import base64
@@ -28,6 +30,17 @@ classNames = []
 myList = os.listdir(path)
 print(myList)
 
+last_attendance_time = 0
+def check_last_attendance():
+    global last_attendance_time
+
+    csv_path = "Attendance.csv"
+    if os.path.exists(csv_path):
+        last_modified = getmtime(csv_path)
+        last_attendance_time = last_modified
+    else:
+        last_attendance_time = 0
+
 camera = cv2.VideoCapture(0)
 face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
 
@@ -49,16 +62,15 @@ def findEncodings(images):
     return encodeList
 
 def markAttendance(name):
-    with open("Attendance.csv", "r+") as f:
-        myDataList = f.readlines()
-        nameList = []
-        for line in myDataList:
-            entry = line.split(',')
-            nameList.append(entry[0])
-        if name not in nameList:
-            now = datetime.now()
-            dtString = now.strftime("%Y-%m-%d %H:%M:%S")
-            f.writelines(f'\n{name}, {dtString}')
+    global last_attendance_time
+
+    csv_path = "Attendance.csv"
+    now = time()
+    if now - last_attendance_time >= 60:  # Якщо минула хвилина з останнього запису
+        with open(csv_path, "a") as f:
+            dtString = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            f.write(f'\n{name}, {dtString}')
+        last_attendance_time = now
 
 encodeListKnown = findEncodings(images)
 print("Декодування закінчено")
@@ -104,55 +116,9 @@ def generate_frames_with_faces():
             frame = buffer.tobytes()
             yield (b'--frame\r\n'
                    b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
-            
-def start_face_check():
-    def run():
-        window = tk.Tk()
-        window.title("Перевірка відвідування")
 
-        lmain = tk.Label(window)
-        lmain.pack()
-
-        def show_frame():
-            success, frame = camera.read()
-            if success:
-                imgS = cv2.resize(frame, (0, 0), None, 0.25, 0.25)
-                imgS = cv2.cvtColor(imgS, cv2.COLOR_BGR2RGB)
-
-                facesCurFrame = face_recognition.face_locations(imgS)
-                encodeCurFrame = face_recognition.face_encodings(imgS, facesCurFrame)
-
-                for encodeFace, faceLoc in zip(encodeCurFrame, facesCurFrame):
-                    matches = face_recognition.compare_faces(encodeListKnown, encodeFace)
-                    faceDis = face_recognition.face_distance(encodeListKnown, encodeFace)
-                    matchIndex = np.argmin(faceDis)
-
-                    if matches[matchIndex]:
-                        name = classNames[matchIndex]
-                        y1, x2, y2, x1 = faceLoc
-                        y1, x2, y2, x1 = y1 * 4, x2 * 4, y2 * 4, x1 * 4
-                        cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
-                        cv2.rectangle(frame, (x1, y2 - 35), (x2, y2), (0, 255, 0), cv2.FILLED)
-                        cv2.putText(frame, name, (x1 + 6, y2 - 6), cv2.FONT_HERSHEY_COMPLEX, 1, (255, 255, 255), 2)
-                        markAttendance(name)
-
-                cv2image = cv2.cvtColor(frame, cv2.COLOR_BGR2RGBA)
-                img = tk.PhotoImage(image=tk.fromarray(cv2image))
-                lmain.imgtk = img
-                lmain.configure(image=img)
-            lmain.after(10, show_frame)
-
-        show_frame()
-        window.mainloop()
-
-    thread = threading.Thread(target=run)
-    thread.start()
-
-@app.route('/start_face_check', methods=['POST'])
-def start_face_check_route():
-    start_face_check()
-    return jsonify({'success': True})
-
+# Оновлення часу останнього запису в CSV
+check_last_attendance()
 
 @app.route('/', methods=['GET', 'POST'])
 def login():
