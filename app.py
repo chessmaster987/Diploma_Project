@@ -75,8 +75,11 @@ def login():
 def student():
     username = session.get('username', None)
     print(username)
-    cur = conn.cursor()
-    return render_template('student/student.html', username=username)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cur.execute("""select full_name, class_number from student where login = %s""", (username,))
+    student_info = cur.fetchall()
+    print(student_info)
+    return render_template('student/student.html', username=username, student_info=student_info)
 
 @app.route('/teacher', methods=['GET', 'POST'])
 def teacher():
@@ -88,13 +91,43 @@ def teacher():
 @app.route('/add_info', methods=['GET', 'POST'])
 def add_info():
     username = session.get('username', None)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    if request.method == 'POST':
+        fio = request.form['fio']
+        class_name = request.form['class']
+        cur.execute(
+            "INSERT INTO student (login, full_name, class_number) VALUES (%s,%s,%s)", (username, fio, class_name))
+        conn.commit()
+        return redirect(url_for('add_info'))
     return render_template('student/add_info.html')
 
+@app.route('/info_student', methods=['GET', 'POST'])
+def info_student():
+    username = session.get('username', None)
+    cur = conn.cursor()
+    cur.execute("""select * from login where login.role = 'student'""")
+    student_data = cur.fetchall()
+    return render_template('teacher/info_student.html', student_data=student_data)
 
-
-
-
-
+@app.route('/add_student', methods=['GET', 'POST'])
+def add_student():
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    if request.method == 'POST':
+        login = request.form['login']
+        password = request.form['password']
+        role = request.form['student_role']
+        cur.execute(
+            "INSERT INTO login (username, password, role) VALUES (%s,%s,%s)", (login, password, role))
+        conn.commit()
+        return redirect(url_for('info_student'))
+    
+@app.route('/student_detailed/<id>', methods=['GET', 'POST'])
+def student_detailed(id):
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cur.execute("""select * from student where login = %s""", (id,))
+    student_detailed = cur.fetchall()
+    print(student_detailed)
+    return render_template('teacher/student_detailed.html', student_detailed=student_detailed)
 
 
 
