@@ -34,21 +34,37 @@
       font-size: 18px;
       font-weight: bold;
     }
+
+    #startButton {
+      display: block;
+      margin: 20px auto;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+    }
   </style>
 </head>
 
 <body>
-  <h1>Перевірка Реєстрації</h1>
+  <h1>Перевірка відвідування</h1>
   <div id="videoContainer">
     <img id="video" src="/video_feed_with_faces" alt="video feed">
     <div id="photoName"></div>
+    <button id="startButton" onclick="startFaceCheck()">Почати перевірку</button>
   </div>
 
   <script>
-    // Here you should set the name of the last saved photo to the photoName element
-    // Assuming you can retrieve this information somehow
-    // For now, we will set it manually for demonstration
-    document.getElementById("photoName").innerText = "Ім'я для ідентифікації - ПІБ.jpg";  // Replace with dynamic data
+    function startFaceCheck() {
+      fetch('/start_face_check', { method: 'POST' })
+        .then(response => response.json())
+        .then(data => {
+          if (data.success) {
+            alert("Перевірка розпочата!");
+          } else {
+            alert("Помилка при запуску перевірки");
+          }
+        });
+    }
   </script>
 </body>
 
