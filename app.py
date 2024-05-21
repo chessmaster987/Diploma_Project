@@ -1,9 +1,20 @@
 import cv2
 import os
-from flask import Flask, Response, render_template, request, redirect, url_for, jsonify
+from flask import Flask, session, Response, render_template, request, redirect, url_for, jsonify
 import base64
+import psycopg2  # pip install psycopg2
+import psycopg2.extras
 
 app = Flask(__name__)
+app.secret_key = "vlad"
+
+DB_HOST = "localhost"
+DB_NAME = "Dyplom"
+DB_USER = "postgres"
+DB_PASS = "25082003"
+
+conn = psycopg2.connect(dbname=DB_NAME, user=DB_USER,
+                        password=DB_PASS, host=DB_HOST)
 
 camera = cv2.VideoCapture(0)
 face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
@@ -34,15 +45,74 @@ def generate_frames_with_faces():
             yield (b'--frame\r\n'
                    b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
 
-@app.route('/')
-def index():
-    return render_template('index.html')
+@app.route('/', methods=['GET', 'POST'])
+def login():
+    if request.method == 'POST':
+        username = request.form['username']
+        password = request.form['password']
+
+        cur = conn.cursor()
+        cur.execute(
+            "SELECT username FROM login WHERE username = %s AND password = %s", (username, password))
+        user = cur.fetchone()
+
+        if user:
+            cur.execute(
+                "SELECT role FROM login WHERE username = %s", (username,))
+            role = cur.fetchone()
+            if role and role[0] == 'admin':
+                session['username'] = username
+                return redirect('/teacher')
+            elif role and role[0] == 'student':
+                session['username'] = username
+                return redirect('/student')
+        else:
+            return 'Неправильний логін або пароль'
+
+    return render_template('login.html')
+
+@app.route('/student', methods=['GET', 'POST'])
+def student():
+    username = session.get('username', None)
+    print(username)
+    cur = conn.cursor()
+    return render_template('student/student.html', username=username)
+
+@app.route('/teacher', methods=['GET', 'POST'])
+def teacher():
+    username = session.get('username', None)
+    print(username)
+    cur = conn.cursor()
+    return render_template('teacher/teacher.html', username=username)
+
+@app.route('/add_info', methods=['GET', 'POST'])
+def add_info():
+    username = session.get('username', None)
+    return render_template('student/add_info.html')
+
+
+
+
+
+
+
+
+
+
+@app.route('/logout', methods=['GET', 'POST'])
+def logout():
+    if request.method == 'POST':
+        # Код для виходу
+        # удалить из сессии имя пользователя, если оно там есть
+        session.pop('username', None)
+        print(session.get('username', None))
+        return redirect(url_for('login'))  # Переадресація на сторінку login
 
 @app.route('/registration', methods=['GET', 'POST'])
 def registration():
     return render_template('registration.html')
 
-@app.route('/authorization', methods=['POST'])
+@app.route('/authorization', methods=['GET', 'POST'])
 def authorization():
     return redirect(url_for('verify_registration'))
 
