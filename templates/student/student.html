@@ -10,10 +10,19 @@
    <style>
       body {
          text-align: center;
+         font-family: Arial, sans-serif;
+         background-color: #f2f2f2;
+         margin: 0;
+         padding: 0;
       }
    
       .container {
          margin-top: 50px;
+         max-width: 600px;
+         margin: 0 auto;
+         background: #fff;
+         padding: 20px;
+         box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
       }
    
       .info-box {
@@ -46,7 +55,7 @@
                <a class="nav-link" href="{{url_for('verify_registration')}}">Зареєструвати відвідування</a>
             </li>
             <li class="nav-item">
-               <a class="nav-link" href="">Архів відвідувань</a>
+               <a class="nav-link" href="{{url_for('attendance_history')}}">Архів відвідувань</a>
             </li>
          </ul>
          <form class="form-inline my-2 my-lg-0" method="post" action="/logout">

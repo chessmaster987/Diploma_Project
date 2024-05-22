@@ -2,13 +2,10 @@ import cv2
 import numpy as np
 import face_recognition
 from datetime import datetime
-import threading
-import tkinter as tk
-from tkinter import messagebox
 from os.path import getmtime
 from time import time
 import os
-from flask import Flask, session, Response, render_template, request, redirect, url_for, jsonify
+from flask import Flask, session, Response, flash, render_template, request, redirect, url_for, jsonify
 import base64
 import psycopg2  # pip install psycopg2
 import psycopg2.extras
@@ -257,6 +254,29 @@ def save_photo():
 @app.route('/verify_registration')
 def verify_registration():
     return render_template('student/verify.html')
+
+@app.route('/attendance_history', methods=['GET', 'POST'])
+def attendance_history():
+    attendance_data = []
+    csv_path = "Attendance.csv"
+    
+    if os.path.exists(csv_path):
+        with open(csv_path, "r") as f:
+            lines = f.readlines()
+            for line in lines:
+                parts = line.split(',')
+                name = parts[0].strip()
+                if os.path.exists(csv_path):
+                    with open(csv_path, "r") as f:
+                        lines = f.readlines()
+                        for line in lines:
+                            parts = line.split(',')
+                            if len(parts) >= 2:  # Перевірка довжини списку parts
+                                name = parts[0].strip()
+                                datetime_str = parts[1].strip()
+                                attendance_data.append({'name': name, 'datetime': datetime_str})
+
+    return render_template('student/attendance_history.html', attendance_data=attendance_data)
 
 if __name__ == '__main__':
     app.run(debug=True)
