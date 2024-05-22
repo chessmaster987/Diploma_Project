@@ -38,7 +38,7 @@ def check_last_attendance():
     else:
         last_attendance_time = 0
 
-camera = cv2.VideoCapture(0)
+#camera = cv2.VideoCapture(0)
 face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
 
 for cls in myList:
@@ -73,46 +73,54 @@ encodeListKnown = findEncodings(images)
 print("Декодування закінчено")
 
 def generate_frames():
-    while True:
-        success, frame = camera.read()
-        if not success:
-            break
-        else:
-            ret, buffer = cv2.imencode('.jpg', frame)
-            frame = buffer.tobytes()
-            yield (b'--frame\r\n'
+    camera = cv2.VideoCapture(0)
+    try:
+        while True:
+            success, frame = camera.read()
+            if not success:
+                break
+            else:
+                ret, buffer = cv2.imencode('.jpg', frame)
+                frame = buffer.tobytes()
+                yield (b'--frame\r\n'
                    b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+    finally:
+        camera.release()
 
 def generate_frames_with_faces():
-    while True:
-        success, frame = camera.read()
-        if not success:
-            break
-        else:
-            imgS = cv2.resize(frame, (0, 0), None, 0.25, 0.25)
-            imgS = cv2.cvtColor(imgS, cv2.COLOR_BGR2RGB)
+    camera = cv2.VideoCapture(0)
+    try:
+        while True:
+            success, frame = camera.read()
+            if not success:
+                break
+            else:
+                imgS = cv2.resize(frame, (0, 0), None, 0.25, 0.25)
+                imgS = cv2.cvtColor(imgS, cv2.COLOR_BGR2RGB)
 
-            facesCurFrame = face_recognition.face_locations(imgS)
-            encodeCurFrame = face_recognition.face_encodings(imgS, facesCurFrame)
+                facesCurFrame = face_recognition.face_locations(imgS)
+                encodeCurFrame = face_recognition.face_encodings(imgS, facesCurFrame)
 
-            for encodeFace, faceLoc in zip(encodeCurFrame, facesCurFrame):
-                matches = face_recognition.compare_faces(encodeListKnown, encodeFace)
-                faceDis = face_recognition.face_distance(encodeListKnown, encodeFace)
-                matchIndex = np.argmin(faceDis)
+                for encodeFace, faceLoc in zip(encodeCurFrame, facesCurFrame):
+                    matches = face_recognition.compare_faces(encodeListKnown, encodeFace)
+                    faceDis = face_recognition.face_distance(encodeListKnown, encodeFace)
+                    matchIndex = np.argmin(faceDis)
 
-                if matches[matchIndex]:
-                    name = classNames[matchIndex]
-                    y1, x2, y2, x1 = faceLoc
-                    y1, x2, y2, x1 = y1 * 4, x2 * 4, y2 * 4, x1 * 4
-                    cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
-                    cv2.rectangle(frame, (x1, y2 - 35), (x2, y2), (0, 255, 0), cv2.FILLED)
-                    cv2.putText(frame, name, (x1 + 6, y2 - 6), cv2.FONT_HERSHEY_COMPLEX, 1, (255, 255, 255), 2)
-                    markAttendance(name)
+                    if matches[matchIndex]:
+                        name = classNames[matchIndex]
+                        y1, x2, y2, x1 = faceLoc
+                        y1, x2, y2, x1 = y1 * 4, x2 * 4, y2 * 4, x1 * 4
+                        cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
+                        cv2.rectangle(frame, (x1, y2 - 35), (x2, y2), (0, 255, 0), cv2.FILLED)
+                        cv2.putText(frame, name, (x1 + 6, y2 - 6), cv2.FONT_HERSHEY_COMPLEX, 1, (255, 255, 255), 2)
+                        markAttendance(name)
 
-            ret, buffer = cv2.imencode('.jpg', frame)
-            frame = buffer.tobytes()
-            yield (b'--frame\r\n'
+                ret, buffer = cv2.imencode('.jpg', frame)
+                frame = buffer.tobytes()
+                yield (b'--frame\r\n'
                    b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
+    finally:
+        camera.release()
 
 # Оновлення часу останнього запису в CSV
 check_last_attendance()
