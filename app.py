@@ -278,5 +278,23 @@ def attendance_history():
 
     return render_template('student/attendance_history.html', attendance_data=attendance_data)
 
+@app.route('/edit_info', methods=['POST'])
+def edit_info():
+    username = session.get('username', None)
+    if not username:
+        return redirect(url_for('login'))
+
+    fio = request.form['fio']
+    class_name = request.form['class']
+    
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cur.execute(
+        "UPDATE student SET full_name = %s, class_number = %s WHERE login = %s", (fio, class_name, username))
+    conn.commit()
+    return redirect(url_for('student'))
+
+
+
+
 if __name__ == '__main__':
     app.run(debug=True)
