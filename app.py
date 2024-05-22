@@ -158,8 +158,11 @@ def student():
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     cur.execute("""select full_name, class_number from student where login = %s""", (username,))
     student_info = cur.fetchall()
+    if not student_info:
+        student_info = [("Інформація ще не внесена користувачем", "Інформація ще не внесена користувачем")]
     print(student_info)
-    return render_template('student/student.html', username=username, student_info=student_info)
+    can_edit = student_info[0][0] != "Інформація ще не внесена користувачем"
+    return render_template('student/student.html', username=username, student_info=student_info, can_edit=can_edit)
 
 @app.route('/teacher', methods=['GET', 'POST'])
 def teacher():
@@ -220,7 +223,12 @@ def logout():
 
 @app.route('/registration', methods=['GET', 'POST'])
 def registration():
-    return render_template('student/registration.html')
+    username = session.get('username', None)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cur.execute("SELECT full_name FROM student WHERE login = %s", (username,))
+    student_info = cur.fetchone()
+    full_name = student_info['full_name'] if student_info else ''
+    return render_template('student/registration.html', full_name=full_name, username=username)
 
 @app.route('/authorization', methods=['GET', 'POST'])
 def authorization():
@@ -300,9 +308,6 @@ def edit_info():
         "UPDATE student SET full_name = %s, class_number = %s WHERE login = %s", (fio, class_name, username))
     conn.commit()
     return redirect(url_for('student'))
-
-
-
 
 if __name__ == '__main__':
     app.run(debug=True)

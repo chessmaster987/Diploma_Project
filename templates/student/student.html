@@ -154,7 +154,11 @@
             <p><strong>Назва групи:</strong> {{ info[1] }}</p>
          {% endfor %}
       </div>
-      <button class="edit-button" onclick="openModal()">Редагувати дані</button>
+      {% if can_edit %}
+         <button id="edit-button" onclick="openModal()">Редагувати дані</button>
+      {% else %}
+         <p>Спершу <a href="{{ url_for('add_info') }}">внесіть інформацію про себе</a>.</p>
+      {% endif %}
    </div>
    <!-- Модальне вікно -->
    <div id="editModal" class="modal">

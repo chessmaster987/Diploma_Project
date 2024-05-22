@@ -72,6 +72,12 @@
           transition: background-color 0.3s ease;
           margin: 0 auto;
         }
+
+        input[readonly] {
+          background-color: #e9ecef; /* Сірий колір для readonly полів */
+          color: #495057;
+          text-align: center;
+        }
     
         button[type="button"]:hover {
           background-color: #0056b3;
@@ -108,13 +114,13 @@
       </div>
    </nav>
 
-   <h1>Форма додавання фото</h1>
+  <h1>Форма додавання фото</h1>
   <form id="registrationForm">
-    <label for="surname">ПІБ:</label><br>
-    <input type="text" id="surname" name="surname"><br><br>
-    <label for="name">Ім'я для ідентифікації:</label><br>
-    <input type="text" id="name" name="name"><br><br>
-    <label for="photo">Фото:</label><br>
+    <label for="surname">ПІБ:</label>
+    <input type="text" id="surname" name="surname" value="{{ full_name }}" readonly>
+    <label for="name">Ім'я для ідентифікації:</label>
+    <input type="text" id="name" name="name" value="{{ username }}" readonly>
+    <label for="photo">Фото:</label>
     <video id="video" autoplay playsinline></video><br><br>
     <canvas id="canvas" width="640" height="480" style="display:none;"></canvas>
     <button type="button" onclick="capturePhoto()">Зареєструватися</button>
