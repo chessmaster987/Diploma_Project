@@ -59,6 +59,7 @@
    <table>
       <thead>
          <tr>
+            <th>ID</th>
             <th>Ім'я</th>
             <th>Дата та час</th>
          </tr>
@@ -66,6 +67,7 @@
       <tbody>
          {% for entry in attendance_data %}
             <tr>
+               <td>{{entry.attendance_number}}</td>
                <td>{{ entry.name }}</td>
                <td>{{ entry.datetime }}</td>
             </tr>

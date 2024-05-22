@@ -60,13 +60,12 @@ def findEncodings(images):
 
 def markAttendance(name):
     global last_attendance_time
-
-    csv_path = "Attendance.csv"
     now = time()
     if now - last_attendance_time >= 60:  # Якщо минула хвилина з останнього запису
-        with open(csv_path, "a") as f:
-            dtString = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            f.write(f'\n{name}, {dtString}')
+        cur = conn.cursor()
+        dtString = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        cur.execute("INSERT INTO attendance (login, timestamp) VALUES (%s, %s)", (name, dtString))
+        conn.commit()
         last_attendance_time = now
 
 encodeListKnown = findEncodings(images)
@@ -156,7 +155,10 @@ def student():
     username = session.get('username', None)
     print(username)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    cur.execute("""select full_name, class_number from student where login = %s""", (username,))
+    cur.execute("""select student.full_name, classes.class_name 
+                from student
+                inner join classes on student.class_number = classes.class_number
+                where login = %s""", (username,))
     student_info = cur.fetchall()
     if not student_info:
         student_info = [("Інформація ще не внесена користувачем", "Інформація ще не внесена користувачем")]
@@ -175,6 +177,8 @@ def teacher():
 def add_info():
     username = session.get('username', None)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cur.execute("""select class_number, class_name from classes""")
+    class_info = cur.fetchall()
     if request.method == 'POST':
         fio = request.form['fio']
         class_name = request.form['class']
@@ -182,7 +186,7 @@ def add_info():
             "INSERT INTO student (login, full_name, class_number) VALUES (%s,%s,%s)", (username, fio, class_name))
         conn.commit()
         return redirect(url_for('add_info'))
-    return render_template('student/add_info.html')
+    return render_template('student/add_info.html', class_info=class_info)
 
 @app.route('/info_student', methods=['GET', 'POST'])
 def info_student():
@@ -247,7 +251,6 @@ def save_photo():
     data = request.get_json()
     photo_data = data['photo_data']
     user_name = data['user_name']
-    surname = data['surname']
 
     # Remove the "data:image/jpeg;base64," prefix
     photo_data = photo_data.split(",")[1]
@@ -260,7 +263,7 @@ def save_photo():
     if not os.path.exists(save_path):
         os.makedirs(save_path)
 
-    photo_filename = f'{user_name} - {surname}.jpg'
+    photo_filename = f'{user_name}.jpg'
     photo_path = os.path.join(save_path, photo_filename)
     with open(photo_path, 'wb') as f:
         f.write(photo_data)
@@ -271,28 +274,12 @@ def save_photo():
 def verify_registration():
     return render_template('student/verify.html')
 
-@app.route('/attendance_history', methods=['GET', 'POST'])
+@app.route('/attendance_history')
 def attendance_history():
-    attendance_data = []
-    csv_path = "Attendance.csv"
-    
-    if os.path.exists(csv_path):
-        with open(csv_path, "r") as f:
-            lines = f.readlines()
-            for line in lines:
-                parts = line.split(',')
-                name = parts[0].strip()
-                if os.path.exists(csv_path):
-                    with open(csv_path, "r") as f:
-                        lines = f.readlines()
-                        for line in lines:
-                            parts = line.split(',')
-                            if len(parts) >= 2:  # Перевірка довжини списку parts
-                                name = parts[0].strip()
-                                datetime_str = parts[1].strip()
-                                attendance_data.append({'name': name, 'datetime': datetime_str})
-
-    return render_template('student/attendance_history.html', attendance_data=attendance_data)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cur.execute("SELECT * FROM attendance")
+    attendance_data = cur.fetchall()
+    return render_template('attendance_history.html', attendance_data=attendance_data)
 
 @app.route('/edit_info', methods=['POST'])
 def edit_info():
@@ -317,6 +304,29 @@ def delete_student(id):
     cur.execute("""delete from login where login.username = %s""", (id,))
     conn.commit()
     return redirect(url_for('info_student'))
+
+@app.route('/info_classes', methods=['GET', 'POST'])
+def info_classes():
+    cur = conn.cursor()
+    cur.execute("""SELECT * FROM classes""")
+    classes_data = cur.fetchall()
+    return render_template('teacher/info_classes.html', classes_data=classes_data)
+
+@app.route('/add_class', methods=['GET', 'POST'])
+def add_class():
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    if request.method == 'POST':
+        class_name = request.form['class_name']
+        # Отримуємо усі існуючі назви класів
+        cur.execute("""SELECT class_name FROM classes""")
+        class_names = [row['class_name'] for row in cur.fetchall()]
+        # Перевіряємо, чи назва класу вже існує
+        if class_name in class_names:
+            return 'Цей клас вже існує!'
+        # Якщо назва класу унікальна, додаємо її до бази даних
+        cur.execute("INSERT INTO classes (class_name) VALUES (%s)", (class_name,))
+        conn.commit()
+        return redirect(url_for('info_classes'))
 
 if __name__ == '__main__':
     app.run(debug=True)
