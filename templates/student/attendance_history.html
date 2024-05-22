@@ -56,22 +56,22 @@
    </nav>
 
    <h1>Історія відвідування</h1>
-    <table>
-        <thead>
+   <table>
+      <thead>
+         <tr>
+            <th>Ім'я</th>
+            <th>Дата та час</th>
+         </tr>
+      </thead>
+      <tbody>
+         {% for entry in attendance_data %}
             <tr>
-                <th>Ім'я</th>
-                <th>Дата та час</th>
+               <td>{{ entry.name }}</td>
+               <td>{{ entry.datetime }}</td>
             </tr>
-        </thead>
-        <tbody>
-            {% for entry in attendance_data %}
-            <tr>
-                <td>{{ entry.name }}</td>
-                <td>{{ entry.datetime }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+         {% endfor %}
+      </tbody>
+   </table>
 
    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
       integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"

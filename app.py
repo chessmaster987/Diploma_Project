@@ -256,7 +256,7 @@ def save_photo():
     photo_data = base64.b64decode(photo_data)
 
     # Save photo as JPEG file
-    save_path = 'photos'
+    save_path = 'KnownFaces'
     if not os.path.exists(save_path):
         os.makedirs(save_path)
 
@@ -308,6 +308,15 @@ def edit_info():
         "UPDATE student SET full_name = %s, class_number = %s WHERE login = %s", (fio, class_name, username))
     conn.commit()
     return redirect(url_for('student'))
+
+@app.route('/delete_student/<id>', methods=['GET', 'POST'])
+def delete_student(id):
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cur.execute("""delete from student where login = %s""", (id,))
+    conn.commit()
+    cur.execute("""delete from login where login.username = %s""", (id,))
+    conn.commit()
+    return redirect(url_for('info_student'))
 
 if __name__ == '__main__':
     app.run(debug=True)

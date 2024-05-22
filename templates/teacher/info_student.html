@@ -88,7 +88,8 @@
              <td>{{ student[2] }}</td>
              <td>{{ student[3] }}</td>
              <td width="130">
-                <a href="/student_detailed/{{student[1]}}" class="btn btn-danger btn-delete btn-sm">ДЕТАЛЬНІШЕ</a>
+                  <a href="/student_detailed/{{student[1]}}" class="btn btn-secondary btn-delete btn-sm">ДЕТАЛЬНІШЕ</a>
+                  <a href="/delete_student/{{student[1]}}" class="btn btn-danger btn-delete btn-sm">ВИДАЛИТИ</a>
              </td>
           </tr>
           {% endfor %}
