@@ -41,13 +41,6 @@ def check_last_attendance():
 #camera = cv2.VideoCapture(0)
 face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
 
-for cls in myList:
-    curImg = cv2.imread(f'{path}/{cls}')
-    images.append(curImg)
-    classNames.append(os.path.splitext(cls)[0])
-
-print(classNames)
-
 def findEncodings(images):
     encodeList = []
     for img in images:
@@ -57,6 +50,20 @@ def findEncodings(images):
             encode = encodings[0]
             encodeList.append(encode)
     return encodeList
+
+def load_images_and_encodings():
+    global images, classNames, encodeListKnown
+    images = []
+    classNames = []
+    myList = os.listdir(path)
+    for cls in myList:
+        curImg = cv2.imread(f'{path}/{cls}')
+        images.append(curImg)
+        classNames.append(os.path.splitext(cls)[0])
+    encodeListKnown = findEncodings(images)
+    print("Декодування закінчено")
+
+load_images_and_encodings()
 
 def markAttendance(name):
     global last_attendance_time
@@ -270,6 +277,9 @@ def save_photo():
     photo_path = os.path.join(save_path, photo_filename)
     with open(photo_path, 'wb') as f:
         f.write(photo_data)
+
+    # Оновлення закодованих зображень після додавання нового фото
+    load_images_and_encodings()
 
     return jsonify({'message': 'Photo saved successfully', 'photo_path': photo_path})
 
