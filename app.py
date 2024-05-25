@@ -291,15 +291,14 @@ def verify_registration():
 def attendance_history():
     username = session.get('username', None)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    cur.execute("SELECT * FROM attendance where login = %s", (username,))
-    attendance_data = cur.fetchall()
+    attendance_data = []
     if request.method == 'POST':
         start_date = request.form['start_date']
         end_date = request.form['end_date']
         cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
         cur.execute(
-            """SELECT * FROM teacher_report(%s, %s, %s)""", (teacher, start_date, end_date))
-        zvit_info = cur.fetchall()
+            """SELECT * FROM attendance_info(%s, %s, %s)""", (start_date, end_date, username))
+        attendance_data = cur.fetchall()
     return render_template('student/attendance_history.html', attendance_data=attendance_data)
 
 @app.route('/edit_info', methods=['POST'])
