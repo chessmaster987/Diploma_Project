@@ -232,7 +232,10 @@ def registration():
     cur.execute("SELECT full_name FROM student WHERE login = %s", (username,))
     student_info = cur.fetchone()
     full_name = student_info['full_name'] if student_info else ''
-    return render_template('student/registration.html', full_name=full_name, username=username)
+     # Перевірка, чи існує фото
+    photo_path = os.path.join('KnownFaces', f'{username}.jpg')
+    photo_exists = os.path.exists(photo_path)
+    return render_template('student/registration.html', full_name=full_name, username=username, photo_exists=photo_exists)
 
 @app.route('/authorization', methods=['GET', 'POST'])
 def authorization():
@@ -279,7 +282,7 @@ def attendance_history():
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     cur.execute("SELECT * FROM attendance")
     attendance_data = cur.fetchall()
-    return render_template('attendance_history.html', attendance_data=attendance_data)
+    return render_template('student/attendance_history.html', attendance_data=attendance_data)
 
 @app.route('/edit_info', methods=['POST'])
 def edit_info():

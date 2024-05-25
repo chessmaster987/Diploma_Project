@@ -123,7 +123,11 @@
     <label for="photo">Фото:</label>
     <video id="video" autoplay playsinline></video><br><br>
     <canvas id="canvas" width="640" height="480" style="display:none;"></canvas>
-    <button type="button" onclick="capturePhoto()">Зареєструватися</button>
+    {% if photo_exists %}
+         <p>Ваше фото вже було внесено у систему. Зверніться до викладача, якщо вважаєте що сталася помилка</p>
+    {% else %}
+      <button type="button" onclick="capturePhoto()">Зареєструватися</button>
+    {% endif %}
   </form>
 
   <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
