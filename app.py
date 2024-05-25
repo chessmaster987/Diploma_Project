@@ -287,11 +287,19 @@ def save_photo():
 def verify_registration():
     return render_template('student/verify.html')
 
-@app.route('/attendance_history')
+@app.route('/attendance_history', methods=['GET', 'POST'])
 def attendance_history():
+    username = session.get('username', None)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    cur.execute("SELECT * FROM attendance")
+    cur.execute("SELECT * FROM attendance where login = %s", (username,))
     attendance_data = cur.fetchall()
+    if request.method == 'POST':
+        start_date = request.form['start_date']
+        end_date = request.form['end_date']
+        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        cur.execute(
+            """SELECT * FROM teacher_report(%s, %s, %s)""", (teacher, start_date, end_date))
+        zvit_info = cur.fetchall()
     return render_template('student/attendance_history.html', attendance_data=attendance_data)
 
 @app.route('/edit_info', methods=['POST'])
@@ -312,7 +320,7 @@ def edit_info():
 @app.route('/delete_student/<id>', methods=['GET', 'POST'])
 def delete_student(id):
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    cur.execute("""delete from student where login = %s""", (id,))
+    cur.execute("""delete from attendance where login = %s""", (id,))
     conn.commit()
     cur.execute("""delete from login where login.username = %s""", (id,))
     conn.commit()
@@ -338,6 +346,27 @@ def add_class():
             return 'Цей клас вже існує!'
         # Якщо назва класу унікальна, додаємо її до бази даних
         cur.execute("INSERT INTO classes (class_name) VALUES (%s)", (class_name,))
+        conn.commit()
+        return redirect(url_for('info_classes'))
+    
+@app.route('/edit_class/<id>', methods=['GET', 'POST'])
+def edit_class(id):
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cur.execute("""SELECT class_number, class_name 
+                FROM classes
+                WHERE class_number = %s""", (id,))
+    data = cur.fetchall()
+    cur.close()
+    print(data[0])
+    return render_template('teacher/edit_class.html', classes=data[0])
+
+@app.route('/update_class/<id>', methods=['POST', 'GET'])
+def update_class(id):
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    if request.method == 'POST':
+        class_name = request.form['class_name']
+        cur.execute(
+            """UPDATE classes SET class_name = %s WHERE class_number = %s""", (class_name, id))
         conn.commit()
         return redirect(url_for('info_classes'))
 

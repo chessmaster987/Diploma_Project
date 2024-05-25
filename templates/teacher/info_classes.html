@@ -63,7 +63,7 @@
         <div class="card card-body">
             <form action="{{url_for('add_class')}}" method="POST">
                 <div class="form-group">
-                    <input type="text" class="form-control" name="class_name" placeholder="Назва групи">
+                    <input type="text" class="form-control" name="class_name" placeholder="Назва групи" required>
                 </div>
                 <button class="btn btn-primary btn-block">
                     Зберегти
@@ -86,7 +86,6 @@
                     <td>{{ classes[1] }}</td>
                     <td width="130">
                         <a href="/edit_class/{{classes[0]}}" class="btn btn-secondary btn-sm">змінити</a>
-                        <a href="/delete_class/{{classes[0]}}" class="btn btn-danger btn-delete btn-sm">видалити</a>
                     </td>
                 </tr>
                 {% endfor %}
