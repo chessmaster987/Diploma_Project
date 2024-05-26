@@ -101,25 +101,34 @@ def generate_frames_with_faces():
             if not success:
                 break
             else:
-                imgS = cv2.resize(frame, (0, 0), None, 0.25, 0.25)
-                imgS = cv2.cvtColor(imgS, cv2.COLOR_BGR2RGB)
+                # Перетворення кадру в сірий колір
+                gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+                
+                # Визначення обличчя за допомогою каскадів Хаара
+                faces = face_cascade.detectMultiScale(gray, scaleFactor=1.1, minNeighbors=5, minSize=(30, 30))
 
-                facesCurFrame = face_recognition.face_locations(imgS)
-                encodeCurFrame = face_recognition.face_encodings(imgS, facesCurFrame)
+                for (x, y, w, h) in faces:
+                    # Виділення обличчя з кадру
+                    face_img = frame[y:y+h, x:x+w]
 
-                for encodeFace, faceLoc in zip(encodeCurFrame, facesCurFrame):
-                    matches = face_recognition.compare_faces(encodeListKnown, encodeFace)
-                    faceDis = face_recognition.face_distance(encodeListKnown, encodeFace)
-                    matchIndex = np.argmin(faceDis)
+                    # Конвертація обличчя в формат RGB
+                    face_img_rgb = cv2.cvtColor(face_img, cv2.COLOR_BGR2RGB)
 
-                    if matches[matchIndex]:
-                        name = classNames[matchIndex]
-                        y1, x2, y2, x1 = faceLoc
-                        y1, x2, y2, x1 = y1 * 4, x2 * 4, y2 * 4, x1 * 4
-                        cv2.rectangle(frame, (x1, y1), (x2, y2), (0, 255, 0), 2)
-                        cv2.rectangle(frame, (x1, y2 - 35), (x2, y2), (0, 255, 0), cv2.FILLED)
-                        cv2.putText(frame, name, (x1 + 6, y2 - 6), cv2.FONT_HERSHEY_COMPLEX, 1, (255, 255, 255), 2)
-                        markAttendance(name)
+                    # Отримання кодування обличчя
+                    face_encoding = face_recognition.face_encodings(face_img_rgb)
+
+                    if len(face_encoding) > 0:
+                        # Порівняння кодування з обличчями у папці KnownFaces
+                        matches = face_recognition.compare_faces(encodeListKnown, face_encoding[0])
+
+                        for i, match in enumerate(matches):
+                            if match:
+                                # Якщо обличчя розпізнано, виведіть ім'я відповідного файлу
+                                name = classNames[i]
+                                cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 255, 0), 2)
+                                cv2.putText(frame, name, (x, y-10), cv2.FONT_HERSHEY_SIMPLEX, 0.9, (36,255,12), 2)
+                                # Реєстрація часу відвідування
+                                markAttendance(name)
 
                 ret, buffer = cv2.imencode('.jpg', frame)
                 frame = buffer.tobytes()
