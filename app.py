@@ -264,30 +264,32 @@ def video_feed_with_faces():
 
 @app.route('/save_photo', methods=['POST'])
 def save_photo():
-    data = request.get_json()
-    photo_data = data['photo_data']
-    user_name = data['user_name']
+    if request.method == 'POST':
+        data = request.get_json()
+        photo_data = data['photo_data']
+        user_name = data['user_name']
 
-    # Remove the "data:image/jpeg;base64," prefix
-    photo_data = photo_data.split(",")[1]
+        # Remove the "data:image/jpeg;base64," prefix
+        photo_data = photo_data.split(",")[1]
 
-    # Decode base64 data
-    photo_data = base64.b64decode(photo_data)
+        # Decode base64 data
+        photo_data = base64.b64decode(photo_data)
 
-    # Save photo as JPEG file
-    save_path = 'KnownFaces'
-    if not os.path.exists(save_path):
-        os.makedirs(save_path)
+        # Save photo as JPEG file
+        save_path = 'KnownFaces'
+        if not os.path.exists(save_path):
+            os.makedirs(save_path)
 
-    photo_filename = f'{user_name}.jpg'
-    photo_path = os.path.join(save_path, photo_filename)
-    with open(photo_path, 'wb') as f:
-        f.write(photo_data)
+        photo_filename = f'{user_name}.jpg'
+        photo_path = os.path.join(save_path, photo_filename)
+        with open(photo_path, 'wb') as f:
+            f.write(photo_data)
 
-    # Оновлення закодованих зображень після додавання нового фото
-    load_images_and_encodings()
+        # Оновлення закодованих зображень після додавання нового фото
+        load_images_and_encodings()
 
-    return jsonify({'message': 'Photo saved successfully', 'photo_path': photo_path})
+        return jsonify({'message': 'Photo saved successfully', 'photo_path': photo_path})
+    return redirect(url_for('registration'))
 
 @app.route('/verify_registration')
 def verify_registration():
@@ -329,6 +331,12 @@ def delete_student(id):
     conn.commit()
     cur.execute("""delete from login where login.username = %s""", (id,))
     conn.commit()
+    cur.execute("""delete from student where login = %s""", (id,))
+    conn.commit()
+    # Видалити фото студента з папки KnownFaces
+    photo_path = os.path.join('KnownFaces', f'{id}.jpg')
+    if os.path.exists(photo_path):
+        os.remove(photo_path)
     return redirect(url_for('info_student'))
 
 @app.route('/info_classes', methods=['GET', 'POST'])
