@@ -152,6 +152,7 @@
          {% for info in student_info %}
             <p><strong>ПІБ студента:</strong> {{ info[0] }}</p>
             <p><strong>Назва групи:</strong> {{ info[1] }}</p>
+            <p><strong>Курс:</strong> {{ info[2] }}</p>
          {% endfor %}
       </div>
       {% if can_edit %}
@@ -170,9 +171,28 @@
                <label for="fio">ПІБ студента:</label>
                <input type="text" id="fio" name="fio" value="{{ student_info[0][0] }}" required>
             </div>
-            <div class="form-group">
+            <!--<div class="form-group">
                <label for="class">Назва групи:</label>
                <input type="text" id="class" name="class" value="{{ student_info[0][1] }}" required>
+            </div>-->
+            <div class="form-group">
+               <label for="class">Група</label>
+               <select class="form-control" name="class" id="class">
+                  {% for row in class_info %}
+                     <option value="{{ row[0] }}">{{ row[1] }}</option>
+                  {% endfor %}
+               </select>   
+            </div>
+            <div class="form-group">
+               <label for="year_of_grade">Курс</label>
+               <select class="form-control" name="year_of_grade" id="year_of_grade">
+                  <option value="1">1</option>
+                  <option value="2">2</option>
+                  <option value="3">3</option>
+                  <option value="4">4</option>
+                  <option value="5">5</option>
+                  <option value="6">6</option>  
+               </select>   
             </div>
             <button type="submit" class="save-button">Зберегти</button>
          </form>

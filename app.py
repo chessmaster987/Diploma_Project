@@ -162,7 +162,7 @@ def student():
     username = session.get('username', None)
     print(username)
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    cur.execute("""select student.full_name, classes.class_name 
+    cur.execute("""select student.full_name, classes.class_name, student.year_of_grade 
                 from student
                 inner join classes on student.class_number = classes.class_number
                 where login = %s""", (username,))
@@ -171,7 +171,9 @@ def student():
         student_info = [("Інформація ще не внесена користувачем", "Інформація ще не внесена користувачем")]
     print(student_info)
     can_edit = student_info[0][0] != "Інформація ще не внесена користувачем"
-    return render_template('student/student.html', username=username, student_info=student_info, can_edit=can_edit)
+    cur.execute("""select class_number, class_name from classes""")
+    class_info = cur.fetchall()
+    return render_template('student/student.html', username=username, student_info=student_info, can_edit=can_edit, class_info=class_info)
 
 @app.route('/teacher', methods=['GET', 'POST'])
 def teacher():
@@ -189,8 +191,9 @@ def add_info():
     if request.method == 'POST':
         fio = request.form['fio']
         class_name = request.form['class']
+        year_of_grade = request.form['year_of_grade']
         cur.execute(
-            "INSERT INTO student (login, full_name, class_number) VALUES (%s,%s,%s)", (username, fio, class_name))
+            "INSERT INTO student (login, full_name, class_number, year_of_grade) VALUES (%s,%s,%s,%s)", (username, fio, class_name, year_of_grade))
         conn.commit()
         return redirect(url_for('add_info'))
     return render_template('student/add_info.html', class_info=class_info)
@@ -301,21 +304,21 @@ def attendance_history():
         attendance_data = cur.fetchall()
     return render_template('student/attendance_history.html', attendance_data=attendance_data)
 
-@app.route('/edit_info', methods=['POST'])
+@app.route('/edit_info', methods=['GET','POST'])
 def edit_info():
     username = session.get('username', None)
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     if not username:
         return redirect(url_for('login'))
-
-    fio = request.form['fio']
-    class_name = request.form['class']
+    if request.method == 'POST':
+        fio = request.form['fio']
+        class_name = request.form['class']
+        year_of_grade = request.form['year_of_grade']
+        cur.execute("""UPDATE student SET full_name = %s, class_number = %s, year_of_grade = %s
+                     WHERE login = %s""", (fio, class_name, year_of_grade, username))
+        conn.commit()
+        return redirect(url_for('student'))
     
-    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    cur.execute(
-        "UPDATE student SET full_name = %s, class_number = %s WHERE login = %s", (fio, class_name, username))
-    conn.commit()
-    return redirect(url_for('student'))
-
 @app.route('/delete_student/<id>', methods=['GET', 'POST'])
 def delete_student(id):
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
