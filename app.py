@@ -40,6 +40,8 @@ def check_last_attendance():
 
 #camera = cv2.VideoCapture(0)
 face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
+# Завантаження додаткових каскадів Хаара для очей
+eye_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_eye.xml')
 
 def findEncodings(images):
     encodeList = []
@@ -110,6 +112,15 @@ def generate_frames_with_faces():
                 for (x, y, w, h) in faces:
                     # Виділення обличчя з кадру
                     face_img = frame[y:y+h, x:x+w]
+
+                    # Виділення області обличчя для подальшої обробки
+                    roi_gray = gray[y:y+h, x:x+w]
+                    roi_color = frame[y:y+h, x:x+w]
+                    
+                    # Визначення очей
+                    eyes = eye_cascade.detectMultiScale(roi_gray)
+                    for (ex, ey, ew, eh) in eyes:
+                        cv2.rectangle(roi_color, (ex, ey), (ex+ew, ey+eh), (0, 255, 0), 2)
 
                     # Конвертація обличчя в формат RGB
                     face_img_rgb = cv2.cvtColor(face_img, cv2.COLOR_BGR2RGB)
