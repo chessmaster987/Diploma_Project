@@ -407,6 +407,24 @@ def check_attendance_detailed(id):
         attendance_detailed = cur.fetchall()
     return render_template('teacher/check_attendance_detailed.html', attendance_detailed=attendance_detailed, id=id)
 
+@app.route('/attendance_statistics', methods=['POST', 'GET'])
+def attendance_statistics():
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    attendance_statistics = []
+    if request.method == 'POST':
+        start_date = request.form['start_date']
+        end_date = request.form['end_date']
+        cur.execute("""select classes.class_name, student.year_of_grade, COUNT(attendance.login) as quantity, RANK() OVER (ORDER BY COUNT(attendance.login) DESC) AS rank
+                from attendance
+                inner join student on attendance.login = student.login
+                inner join classes on student.class_number = classes.class_number
+                WHERE attendance.timestamp BETWEEN %s AND %s
+                Group By classes.class_name, student.year_of_grade
+                """, (start_date, end_date))
+        attendance_statistics = cur.fetchall()
+    return render_template('teacher/attendance_statistics.html', attendance_statistics=attendance_statistics)
+
+
 
 if __name__ == '__main__':
     app.run(debug=True)
