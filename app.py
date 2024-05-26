@@ -224,7 +224,10 @@ def add_student():
 @app.route('/student_detailed/<id>', methods=['GET', 'POST'])
 def student_detailed(id):
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-    cur.execute("""select * from student where login = %s""", (id,))
+    cur.execute("""select student.login, student.full_name, classes.class_name, student.year_of_grade
+                from student
+                inner join classes on student.class_number = classes.class_number
+                where login = %s""", (id,))
     student_detailed = cur.fetchall()
     print(student_detailed)
     return render_template('teacher/student_detailed.html', student_detailed=student_detailed)
@@ -382,6 +385,28 @@ def update_class(id):
             """UPDATE classes SET class_name = %s WHERE class_number = %s""", (class_name, id))
         conn.commit()
         return redirect(url_for('info_classes'))
+
+@app.route('/check_attendance', methods=['POST', 'GET'])
+def check_attendance():
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    cur.execute("""select class_number, class_name from classes""")
+    classes_info = cur.fetchall()
+    return render_template('teacher/check_attendance.html', classes_info=classes_info)
+    
+@app.route('/check_attendance_detailed/<id>', methods=['POST', 'GET'])
+def check_attendance_detailed(id):
+    cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+    attendance_detailed = []
+    if request.method == 'POST':
+        year_of_grade = request.form['year_of_grade']
+        cur.execute("""select attendance.login, student.full_name, classes.class_name, student.year_of_grade, attendance.timestamp
+                    from attendance
+                    inner join student on attendance.login = student.login
+                    inner join classes on student.class_number = classes.class_number
+                    where classes.class_number = %s and student.year_of_grade = %s""", (id, year_of_grade))
+        attendance_detailed = cur.fetchall()
+    return render_template('teacher/check_attendance_detailed.html', attendance_detailed=attendance_detailed, id=id)
+
 
 if __name__ == '__main__':
     app.run(debug=True)
