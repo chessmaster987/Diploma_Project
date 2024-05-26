@@ -81,7 +81,11 @@
                <option value="6">6</option>  
             </select>   
          </div>
-        <button type="submit" class="btn btn-primary mt-3">Додати</button>
+         {% if not is_info_complete %}
+            <button type="submit" class="btn btn-primary mt-3">Додати</button>
+         {% else %}
+            <p>Інформація вже внесена. Ви можете відредагувати її на головному екрані</p>
+         {% endif %}
     </form>
     </div>
 

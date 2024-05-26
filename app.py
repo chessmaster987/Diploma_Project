@@ -188,6 +188,9 @@ def add_info():
     cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
     cur.execute("""select class_number, class_name from classes""")
     class_info = cur.fetchall()
+    cur.execute("""select full_name, class_number, year_of_grade from student where login = %s""", (username,))
+    student_info = cur.fetchone()
+    is_info_complete = student_info and all(student_info)  # Перевірка, чи всі поля заповнені
     if request.method == 'POST':
         fio = request.form['fio']
         class_name = request.form['class']
@@ -196,7 +199,7 @@ def add_info():
             "INSERT INTO student (login, full_name, class_number, year_of_grade) VALUES (%s,%s,%s,%s)", (username, fio, class_name, year_of_grade))
         conn.commit()
         return redirect(url_for('add_info'))
-    return render_template('student/add_info.html', class_info=class_info)
+    return render_template('student/add_info.html', class_info=class_info, is_info_complete=is_info_complete)
 
 @app.route('/info_student', methods=['GET', 'POST'])
 def info_student():
