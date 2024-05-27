@@ -97,6 +97,7 @@ def generate_frames():
 
 def generate_frames_with_faces():
     camera = cv2.VideoCapture(0)
+    encoding_printed = False  # Ініціалізуємо змінну перед входженням у цикл
     try:
         while True:
             success, frame = camera.read()
@@ -127,11 +128,14 @@ def generate_frames_with_faces():
 
                     # Отримання кодування обличчя
                     face_encoding = face_recognition.face_encodings(face_img_rgb)
+                    #print(face_encoding)  # Виведення кодування обличчя у консоль
+                    if not encoding_printed and len(face_encoding) > 0:
+                        print(face_encoding)  # Виведення кодування обличчя у консоль
+                        encoding_printed = True
 
                     if len(face_encoding) > 0:
                         # Порівняння кодування з обличчями у папці KnownFaces
                         matches = face_recognition.compare_faces(encodeListKnown, face_encoding[0])
-
                         for i, match in enumerate(matches):
                             if match:
                                 # Якщо обличчя розпізнано, виведіть ім'я відповідного файлу
@@ -141,6 +145,15 @@ def generate_frames_with_faces():
                                 # Реєстрація часу відвідування
                                 markAttendance(name)
 
+                    # Отримання landmarks
+                    face_landmarks_list = face_recognition.face_landmarks(face_img_rgb)
+                    
+                    # Відображення landmarks на зображенні
+                    for landmarks in face_landmarks_list:
+                        for landmark in landmarks.values():
+                            for point in landmark:
+                                cv2.circle(frame, (x + point[0], y + point[1]), 1, (255, 255, 255), -1)            
+
                 ret, buffer = cv2.imencode('.jpg', frame)
                 frame = buffer.tobytes()
                 yield (b'--frame\r\n'
@@ -148,7 +161,6 @@ def generate_frames_with_faces():
     finally:
         camera.release()
 
-# Оновлення часу останнього запису в CSV
 check_last_attendance()
 
 @app.route('/', methods=['GET', 'POST'])
