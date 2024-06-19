@@ -304,13 +304,13 @@ def save_photo():
         photo_data = data['photo_data']
         user_name = data['user_name']
 
-        # Remove the "data:image/jpeg;base64," prefix
+        # Видалення префікса "data:image/jpeg;base64,"
         photo_data = photo_data.split(",")[1]
 
-        # Decode base64 data
+        # Декодування даних base64
         photo_data = base64.b64decode(photo_data)
 
-        # Save photo as JPEG file
+        # Збереження фото у форматі JPEG
         save_path = 'KnownFaces'
         if not os.path.exists(save_path):
             os.makedirs(save_path)
