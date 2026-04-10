@@ -456,7 +456,5 @@ def attendance_statistics():
         attendance_statistics = cur.fetchall()
     return render_template('teacher/attendance_statistics.html', attendance_statistics=attendance_statistics)
 
-
-
 if __name__ == '__main__':
     app.run(debug=True)
