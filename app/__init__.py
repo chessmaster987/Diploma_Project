@@ -1,10 +1,12 @@
 from flask import Flask
+from dotenv import load_dotenv
 
 def create_app():
-    app = Flask(__name__)
+    load_dotenv()  
+
+    app = Flask(__name__, template_folder='templates', static_folder='static')
     app.secret_key = "supersecretkey"
 
-    # import routes
     from app.routes.teacher import teacher_bp
     app.register_blueprint(teacher_bp)
 

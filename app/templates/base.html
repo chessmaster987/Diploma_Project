@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+   <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <title>{% block title %}My App{% endblock %}</title>
+
+   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css">
+</head>
+
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-light bg-light">
+   <a class="navbar-brand" href="{{ url_for('teacher.teacher') }}">Головна</a>
+
+   <div class="collapse navbar-collapse">
+      <ul class="navbar-nav mr-auto">
+
+         <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('teacher.info_student') }}">
+               Інформація про студентів
+            </a>
+         </li>
+
+         <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('teacher.info_classes') }}">
+               Управління групами
+            </a>
+         </li>
+
+         <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('teacher.check_attendance') }}">
+               Перегляд відвідувань студентів
+            </a>
+         </li>
+
+         <li class="nav-item">
+            <a class="nav-link" href="{{ url_for('teacher.attendance_statistics') }}">
+               Перегляд статистики відвідувань
+            </a>
+         </li>
+
+      </ul>
+
+      <form method="post" action="/logout">
+         <button class="btn btn-outline-success">Logout</button>
+      </form>
+   </div>
+</nav>
+
+<div class="container mt-4">
+   {% block content %}
+   {% endblock %}
+</div>
+
+</body>
+</html>

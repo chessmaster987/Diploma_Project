@@ -1,4 +1,58 @@
-<!DOCTYPE html>
+{% extends "base.html" %}
+
+{% block title %}Students{% endblock %}
+
+{% block content %}
+
+<div class="row">
+    <div class="col-md-4">
+        <form action="" method="POST">
+
+            <input class="form-control mb-2" name="login" placeholder="Login">
+            <input class="form-control mb-2" name="password" placeholder="Password">
+
+            <input class="form-control mb-2" name="student_role" value="student">
+
+            <button class="btn btn-primary btn-block">Зберегти</button>
+        </form>
+    </div>
+
+    <div class="col-md-8">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Логін</th>
+                    <th>Пароль</th>
+                    <th>Роль</th>
+                </tr>
+            </thead>
+
+            <tbody>
+            {% for student in student_data %}
+                <tr>
+                    <td>{{ student[0] }}</td>
+                    <td>{{ student[1] }}</td>
+                    <td>{{ student[2] }}</td>
+                    <td>{{ student[3] }}</td>
+
+                    <td>
+                        <a href="/student_detailed/{{ student[1] }}" class="btn btn-sm btn-info">Детальніше</a>
+                        <a href="/delete_student/{{ student[1] }}" class="btn btn-sm btn-danger">Видалити</a>
+                    </td>
+                </tr>
+            {% endfor %}
+            </tbody>
+
+        </table>
+    </div>
+</div>
+
+{% endblock %}
+
+
+
+<!--<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -111,4 +165,4 @@
       crossorigin="anonymous"></script>
 </body>
 
-</html>
+</html>-->

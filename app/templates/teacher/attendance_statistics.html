@@ -1,4 +1,92 @@
-<!DOCTYPE html>
+{% extends "base.html" %}
+
+{% block title %}Статистика відвідувань{% endblock %}
+
+{% block content %}
+
+<h3 class="mb-4">Статистика відвідувань</h3>
+
+<div class="row justify-content-center mb-4">
+
+    <div class="col-md-4">
+
+        <div class="card card-body">
+
+            <form method="POST">
+
+                <label for="start_date">Початкова дата:</label>
+                <input type="text"
+                       id="start_date"
+                       name="start_date"
+                       class="form-control mb-2">
+
+                <label for="end_date">Кінцева дата:</label>
+                <input type="text"
+                       id="end_date"
+                       name="end_date"
+                       class="form-control mb-3">
+
+                <button type="submit" class="btn btn-success btn-block">
+                    Відправити
+                </button>
+
+            </form>
+
+        </div>
+
+    </div>
+
+</div>
+
+<table class="table table-striped table-bordered">
+
+    <thead>
+        <tr>
+            <th>Група</th>
+            <th>Курс</th>
+            <th>Кількість відміток</th>
+            <th>Місце в рейтингу</th>
+        </tr>
+    </thead>
+
+    <tbody>
+
+    {% for stat in attendance_statistics %}
+        <tr>
+            <td>{{ stat[0] }}</td>
+            <td>{{ stat[1] }}</td>
+            <td>{{ stat[2] }}</td>
+            <td>{{ stat[3] }}</td>
+        </tr>
+    {% endfor %}
+
+    </tbody>
+
+</table>
+
+<!-- Flatpickr -->
+<link rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/flatpickr@4.6.9/dist/flatpickr.min.css">
+
+<script src="https://cdn.jsdelivr.net/npm/flatpickr@4.6.9/dist/flatpickr.min.js"></script>
+
+<script>
+    flatpickr("#start_date", {
+        maxDate: "today",
+        dateFormat: "Y-m-d",
+    });
+
+    flatpickr("#end_date", {
+        maxDate: "today",
+        dateFormat: "Y-m-d",
+    });
+</script>
+
+{% endblock %}
+
+
+
+<!--<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -196,4 +284,4 @@
       </script>
 </body>
 
-</html>
+</html>-->
