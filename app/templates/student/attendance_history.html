@@ -1,0 +1,63 @@
+{% extends "student_base.html" %}
+
+{% block title %}Архів відвідувань{% endblock %}
+
+{% block content %}
+<div class="row mb-4">
+    <div class="col-lg-4">
+        <div class="card card-soft">
+            <div class="card-body">
+                <h2 class="h5 mb-3">Фільтр</h2>
+                <form method="post">
+                    <div class="form-group">
+                        <label for="start_date">Початкова дата</label>
+                        <input type="text" class="form-control" id="start_date" name="start_date" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="end_date">Кінцева дата</label>
+                        <input type="text" class="form-control" id="end_date" name="end_date" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">Показати</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card card-soft">
+    <div class="card-body">
+        <h2 class="h5 mb-3">Історія відвідувань</h2>
+        <div class="table-responsive">
+            <table class="table table-striped mb-0">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Ім'я</th>
+                        <th>Дата та час</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for entry in attendance_data %}
+                        <tr>
+                            <td>{{ entry[0] }}</td>
+                            <td>{{ entry[1] }}</td>
+                            <td>{{ entry[2] }}</td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="3" class="text-muted">Немає даних для відображення.</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    flatpickr("#start_date", { maxDate: "today", dateFormat: "Y-m-d" });
+    flatpickr("#end_date", { maxDate: "today", dateFormat: "Y-m-d" });
+</script>
+{% endblock %}

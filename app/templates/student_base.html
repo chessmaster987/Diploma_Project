@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block navigation %}
+<nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom">
+    <div class="container">
+        <a class="navbar-brand font-weight-bold" href="{{ url_for('student.student_dashboard') }}">Student Panel</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#studentNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="studentNav">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('student.add_info') }}">Мої дані</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('student.registration') }}">Фото</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('student.verify_registration') }}">Перевірка</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('student.attendance_history') }}">Архів</a>
+                </li>
+            </ul>
+
+            <form method="post" action="{{ url_for('auth.logout') }}">
+                <button class="btn btn-outline-secondary">Вийти</button>
+            </form>
+        </div>
+    </div>
+</nav>
+{% endblock %}

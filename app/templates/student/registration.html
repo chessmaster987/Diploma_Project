@@ -1,0 +1,78 @@
+{% extends "student_base.html" %}
+
+{% block title %}Реєстрація фото{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-7">
+        <div class="card card-soft">
+            <div class="card-body p-4">
+                <h2 class="h4 mb-4">Додавання фото</h2>
+
+                <form id="registrationForm">
+                    <div class="form-group text-left">
+                        <label for="surname">ПІБ</label>
+                        <input type="text" class="form-control" id="surname" value="{{ full_name }}" readonly>
+                    </div>
+                    <div class="form-group text-left">
+                        <label for="name">Ім'я для ідентифікації</label>
+                        <input type="text" class="form-control" id="name" value="{{ username }}" readonly>
+                    </div>
+
+                    <video id="video" autoplay playsinline class="w-100 rounded border"></video>
+                    <canvas id="canvas" width="640" height="480" style="display:none;"></canvas>
+
+                    {% if photo_exists %}
+                        <p class="alert alert-info mt-3 mb-0">Фото вже додане до системи. Якщо це помилка, зверніться до викладача.</p>
+                    {% else %}
+                        <button type="button" class="btn btn-primary mt-3" onclick="capturePhoto()">Зареєструватися</button>
+                    {% endif %}
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    const video = document.getElementById("video");
+    const canvas = document.getElementById("canvas");
+    const context = canvas.getContext("2d");
+
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        navigator.mediaDevices.getUserMedia({ video: true }).then(function (stream) {
+            video.srcObject = stream;
+            video.play();
+        });
+    }
+
+    function capturePhoto() {
+        const userName = document.getElementById("name").value.trim();
+        const surname = document.getElementById("surname").value.trim();
+
+        if (!userName || !surname) {
+            alert("Будь ласка, перевірте ПІБ та ім'я для ідентифікації.");
+            return;
+        }
+
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+        const photo = canvas.toDataURL("image/jpeg");
+
+        fetch("{{ url_for('student.save_photo') }}", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+                photo_data: photo,
+                user_name: userName,
+                surname: surname
+            })
+        }).then((response) => {
+            if (response.ok) {
+                alert("Фото збережено успішно");
+                window.location.reload();
+            }
+        });
+    }
+</script>
+{% endblock %}
