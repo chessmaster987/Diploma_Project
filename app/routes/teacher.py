@@ -11,7 +11,12 @@ teacher_bp = Blueprint("teacher", __name__)
 
 def require_teacher_session():
     username = session.get("username")
-    if not username:
+    role = session.get("role")
+    if not username or not role:
+        return None, redirect(url_for("auth.login"))
+    if role != "admin":
+        if role == "student":
+            return None, redirect(url_for("student.student_dashboard"))
         return None, redirect(url_for("auth.login"))
     return username, None
 
