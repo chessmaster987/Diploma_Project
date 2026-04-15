@@ -25,7 +25,11 @@
                     {% if photo_exists %}
                         <p class="alert alert-info mt-3 mb-0">Фото вже додане до системи. Якщо це помилка, зверніться до викладача.</p>
                     {% else %}
-                        <button type="button" class="btn btn-primary mt-3" onclick="capturePhoto()">Зареєструватися</button>
+                        <div class="d-flex justify-content-center">
+                            <button type="button" class="btn btn-primary mt-3 px-4" onclick="capturePhoto()">
+                                <i class="bi bi-camera"></i> Зареєструватися
+                            </button>
+                        </div>
                     {% endif %}
                 </form>
             </div>

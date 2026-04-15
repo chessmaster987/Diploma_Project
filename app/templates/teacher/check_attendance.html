@@ -21,7 +21,7 @@
                         <td>{{ class[0] }}</td>
                         <td>{{ class[1] }}</td>
                         <td>
-                            <a href="{{ url_for('teacher.check_attendance_detailed', id=class[0]) }}" class="btn btn-sm btn-secondary">Обрати</a>
+                            <a href="{{ url_for('teacher.check_attendance_detailed', id=class[0]) }}" class="btn btn-sm btn-secondary"><i class="bi bi-arrow-right-circle"></i> Обрати</a>
                         </td>
                     </tr>
                 {% endfor %}

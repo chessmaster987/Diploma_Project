@@ -1,0 +1,8 @@
+# Ignore frontend files in GitHub language stats
+
+*.html linguist-detectable=false
+*.css linguist-detectable=false
+*.js linguist-detectable=false
+
+app/templates/** linguist-detectable=false
+static/** linguist-detectable=false
