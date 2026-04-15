@@ -5,9 +5,11 @@
 {% block content %}
 <div class="row justify-content-center">
     <div class="col-lg-8">
-        <div class="card card-soft">
+        <div class="card card-soft fade-in">
             <div class="card-body p-4">
-                <h1 class="h3 mb-4">Вітаю, {{ username }}</h1>
+                <h1 class="h3 mb-4">
+                    👋 Вітаю, <span class="text-primary">{{ username }}</span>
+                </h1>
 
                 <div class="border rounded p-3 bg-light">
                     {% for info in student_info %}
@@ -18,7 +20,9 @@
                 </div>
 
                 {% if can_edit %}
-                    <button class="btn btn-primary mt-4" data-toggle="modal" data-target="#editModal">Редагувати дані</button>
+                    <button class="btn btn-primary mt-4" data-toggle="modal" data-target="#editModal">
+                        <i class="bi bi-pencil"></i> Редагувати дані
+                    </button>
                 {% else %}
                     <p class="mt-4 mb-0">Спочатку <a href="{{ url_for('student.add_info') }}">внесіть інформацію про себе</a>.</p>
                 {% endif %}

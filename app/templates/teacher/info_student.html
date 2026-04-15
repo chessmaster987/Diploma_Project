@@ -5,7 +5,7 @@
 {% block content %}
 <div class="row">
     <div class="col-lg-4 mb-4">
-        <div class="card card-soft">
+        <div class="card card-soft fade-in">
             <div class="card-body">
                 <h2 class="h5 mb-3">Додати студента</h2>
                 <form action="{{ url_for('teacher.add_student') }}" method="post">
@@ -19,7 +19,7 @@
     </div>
 
     <div class="col-lg-8">
-        <div class="card card-soft">
+        <div class="card card-soft fade-in">
             <div class="card-body">
                 <h2 class="h5 mb-3">Список студентів</h2>
                 <div class="table-responsive">
@@ -41,8 +41,8 @@
                                 <td>{{ student[2] }}</td>
                                 <td>{{ student[3] }}</td>
                                 <td class="text-nowrap">
-                                    <a href="{{ url_for('teacher.student_detailed', id=student[1]) }}" class="btn btn-sm btn-info">Детальніше</a>
-                                    <a href="{{ url_for('teacher.delete_student', id=student[1]) }}" class="btn btn-sm btn-danger">Видалити</a>
+                                    <a href="{{ url_for('teacher.student_detailed', id=student[1]) }}" class="btn btn-sm btn-info"><i class="bi bi-eye"></i> Детальніше</a>
+                                    <a href="{{ url_for('teacher.delete_student', id=student[1]) }}" class="btn btn-sm btn-danger"><i class="bi bi-trash"></i> Видалити</a>
                                 </td>
                             </tr>
                         {% endfor %}

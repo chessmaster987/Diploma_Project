@@ -5,19 +5,19 @@
 {% block content %}
 <div class="row">
     <div class="col-lg-4 mb-4">
-        <div class="card card-soft">
+        <div class="card card-soft fade-in">
             <div class="card-body">
                 <h2 class="h5 mb-3">Додати групу</h2>
                 <form action="{{ url_for('teacher.add_class') }}" method="post">
                     <input type="text" class="form-control mb-3" name="class_name" placeholder="Назва групи" required>
-                    <button class="btn btn-primary btn-block">Зберегти</button>
+                    <button class="btn btn-primary w-100"><i class="bi bi-plus-circle"></i> Зберегти</button>
                 </form>
             </div>
         </div>
     </div>
 
     <div class="col-lg-8">
-        <div class="card card-soft">
+        <div class="card card-soft fade-in">
             <div class="card-body">
                 <h2 class="h5 mb-3">Список груп</h2>
                 <div class="table-responsive">
@@ -35,7 +35,7 @@
                                 <td>{{ classes[0] }}</td>
                                 <td>{{ classes[1] }}</td>
                                 <td>
-                                    <a href="{{ url_for('teacher.edit_class', id=classes[0]) }}" class="btn btn-sm btn-secondary">Змінити</a>
+                                    <a href="{{ url_for('teacher.edit_class', id=classes[0]) }}" class="btn btn-sm btn-secondary"><i class="bi bi-pencil-square"></i> Змінити</a>
                                 </td>
                             </tr>
                         {% endfor %}
