@@ -268,7 +268,6 @@ def check_attendance_detailed(id):
         id=id,
     )
 
-
 @teacher_bp.route("/attendance_statistics", methods=["GET", "POST"])
 def attendance_statistics():
     _, redirect_response = require_teacher_session()
@@ -276,11 +275,27 @@ def attendance_statistics():
         return redirect_response
 
     attendance_statistics_data = []
+    chart_data = {
+        "labels": [],
+        "counts": [],
+        "course_labels": [],
+        "course_counts": [],
+    }
+    stats_summary = {
+        "total_marks": 0,
+        "top_group": None,
+        "report_entries": 0,
+    }
+    selected_dates = {"start_date": "", "end_date": ""}
 
     connection = get_db_connection()
     try:
         with get_cursor(connection, dict_cursor=True) as cursor:
             if request.method == "POST":
+                selected_dates = {
+                    "start_date": request.form["start_date"],
+                    "end_date": request.form["end_date"],
+                }
                 cursor.execute(
                     """
                     SELECT classes.class_name,
@@ -293,13 +308,37 @@ def attendance_statistics():
                     WHERE attendance.timestamp BETWEEN %s AND %s
                     GROUP BY classes.class_name, student.year_of_grade
                     """,
-                    (request.form["start_date"], request.form["end_date"]),
+                    (selected_dates["start_date"], selected_dates["end_date"]),
                 )
                 attendance_statistics_data = cursor.fetchall()
     finally:
         connection.close()
 
+    if attendance_statistics_data:
+        course_totals = {}
+        stats_summary["total_marks"] = sum(row["quantity"] for row in attendance_statistics_data)
+        stats_summary["report_entries"] = len(attendance_statistics_data)
+
+        top_row = max(attendance_statistics_data, key=lambda row: row["quantity"])
+        stats_summary["top_group"] = {
+            "label": f"{top_row['class_name']} / {top_row['year_of_grade']} курс",
+            "quantity": top_row["quantity"],
+        }
+
+        for row in attendance_statistics_data:
+            chart_data["labels"].append(f"{row['class_name']} / {row['year_of_grade']} курс")
+            chart_data["counts"].append(row["quantity"])
+
+            course_label = f"{row['year_of_grade']} курс"
+            course_totals[course_label] = course_totals.get(course_label, 0) + row["quantity"]
+
+        chart_data["course_labels"] = list(course_totals.keys())
+        chart_data["course_counts"] = list(course_totals.values())
+
     return render_template(
         "teacher/attendance_statistics.html",
         attendance_statistics=attendance_statistics_data,
+        chart_data=chart_data,
+        stats_summary=stats_summary,
+        selected_dates=selected_dates,
     )
