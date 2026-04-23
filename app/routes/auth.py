@@ -34,7 +34,7 @@ def login():
             connection.close()
 
         if not user:
-            return "Неправильний логін або пароль"
+            return "Invalid username or password"
 
         session["username"] = user[0]
         session["role"] = user[1]

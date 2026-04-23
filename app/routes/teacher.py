@@ -155,7 +155,7 @@ def add_class():
                 class_names = [row["class_name"] for row in cursor.fetchall()]
 
                 if class_name in class_names:
-                    return "Цей клас вже існує!"
+                    return "This group already exists!"
 
                 cursor.execute(
                     "INSERT INTO classes (class_name) VALUES (%s)",
@@ -268,6 +268,7 @@ def check_attendance_detailed(id):
         id=id,
     )
 
+
 @teacher_bp.route("/attendance_statistics", methods=["GET", "POST"])
 def attendance_statistics():
     _, redirect_response = require_teacher_session()
@@ -321,15 +322,15 @@ def attendance_statistics():
 
         top_row = max(attendance_statistics_data, key=lambda row: row["quantity"])
         stats_summary["top_group"] = {
-            "label": f"{top_row['class_name']} / {top_row['year_of_grade']} курс",
+            "label": f"{top_row['class_name']} / Year {top_row['year_of_grade']}",
             "quantity": top_row["quantity"],
         }
 
         for row in attendance_statistics_data:
-            chart_data["labels"].append(f"{row['class_name']} / {row['year_of_grade']} курс")
+            chart_data["labels"].append(f"{row['class_name']} / Year {row['year_of_grade']}")
             chart_data["counts"].append(row["quantity"])
 
-            course_label = f"{row['year_of_grade']} курс"
+            course_label = f"Year {row['year_of_grade']}"
             course_totals[course_label] = course_totals.get(course_label, 0) + row["quantity"]
 
         chart_data["course_labels"] = list(course_totals.keys())

@@ -1,36 +1,145 @@
 {% extends "student_base.html" %}
 
-{% block title %}Реєстрація фото{% endblock %}
+{% block title %}Photo Registration{% endblock %}
+
+{% block extra_head %}
+<style>
+    .liveness-panel {
+        background: linear-gradient(180deg, rgba(79, 70, 229, 0.08), rgba(79, 70, 229, 0.02));
+        border-radius: 18px;
+        padding: 1rem;
+    }
+
+    .liveness-step {
+        border: 1px solid rgba(79, 70, 229, 0.12);
+        border-radius: 14px;
+        padding: 0.85rem 1rem;
+        background: #fff;
+        margin-bottom: 0.75rem;
+    }
+
+    .liveness-step.active {
+        border-color: rgba(79, 70, 229, 0.4);
+        box-shadow: 0 10px 24px rgba(79, 70, 229, 0.08);
+    }
+
+    .liveness-step.done {
+        border-color: rgba(16, 185, 129, 0.4);
+        background: rgba(16, 185, 129, 0.08);
+    }
+
+    .status-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        border-radius: 999px;
+        padding: 0.45rem 0.85rem;
+        background: rgba(14, 165, 233, 0.12);
+        color: #0f172a;
+        font-size: 0.92rem;
+        font-weight: 600;
+    }
+
+    .status-pill.ready {
+        background: rgba(16, 185, 129, 0.16);
+        color: #065f46;
+    }
+
+    #video {
+        aspect-ratio: 4 / 3;
+        object-fit: cover;
+        background: #0f172a;
+    }
+</style>
+{% endblock %}
 
 {% block content %}
 <div class="row justify-content-center">
-    <div class="col-lg-7">
+    <div class="col-xl-10">
         <div class="card card-soft">
-            <div class="card-body p-4">
-                <h2 class="h4 mb-4">Додавання фото</h2>
-
-                <form id="registrationForm">
-                    <div class="form-group text-left">
-                        <label for="surname">ПІБ</label>
-                        <input type="text" class="form-control" id="surname" value="{{ full_name }}" readonly>
+            <div class="card-body p-4 p-lg-5">
+                <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center mb-4">
+                    <div>
+                        <h1 class="h3 mb-2">Photo Registration</h1>
+                        <p class="text-muted mb-0">
+                            Complete a quick liveness check before saving your registration photo.
+                        </p>
                     </div>
-                    <div class="form-group text-left">
-                        <label for="name">Ім'я для ідентифікації</label>
-                        <input type="text" class="form-control" id="name" value="{{ username }}" readonly>
-                    </div>
+                    <span id="livenessBadge" class="status-pill mt-3 mt-lg-0">
+                        Waiting to start
+                    </span>
+                </div>
 
-                    <video id="video" autoplay playsinline class="w-100 rounded border"></video>
-                    <canvas id="canvas" width="640" height="480" style="display:none;"></canvas>
+                <form
+                    id="registrationForm"
+                    data-start-url="{{ url_for('student.start_liveness') }}"
+                    data-check-url="{{ url_for('student.check_liveness') }}"
+                    data-save-url="{{ url_for('student.save_photo') }}"
+                >
+                    <div class="row">
+                        <div class="col-lg-7 mb-4 mb-lg-0">
+                            <div class="form-row">
+                                <div class="form-group col-md-7">
+                                    <label for="surname">Full Name</label>
+                                    <input type="text" class="form-control" id="surname" value="{{ full_name }}" readonly>
+                                </div>
+                                <div class="form-group col-md-5">
+                                    <label for="name">Username</label>
+                                    <input type="text" class="form-control" id="name" value="{{ username }}" readonly>
+                                </div>
+                            </div>
 
-                    {% if photo_exists %}
-                        <p class="alert alert-info mt-3 mb-0">Фото вже додане до системи. Якщо це помилка, зверніться до викладача.</p>
-                    {% else %}
-                        <div class="d-flex justify-content-center">
-                            <button type="button" class="btn btn-primary mt-3 px-4" onclick="capturePhoto()">
-                                <i class="bi bi-camera"></i> Зареєструватися
-                            </button>
+                            <video id="video" autoplay playsinline class="w-100 rounded border"></video>
+                            <canvas id="canvas" width="640" height="480" style="display:none;"></canvas>
+
+                            {% if photo_exists %}
+                                <div class="alert alert-info mt-3 mb-0">
+                                    A photo is already stored for this account. If you need to replace it, please contact your teacher.
+                                </div>
+                            {% else %}
+                                <div class="d-flex flex-wrap align-items-center mt-3">
+                                    <button id="captureButton" type="button" class="btn btn-primary mr-3 mb-2" onclick="capturePhoto()" disabled>
+                                        <i class="bi bi-camera"></i> Save Photo
+                                    </button>
+                                    <span class="text-muted small mb-2">
+                                        The button will unlock automatically after all liveness steps are completed.
+                                    </span>
+                                </div>
+                            {% endif %}
                         </div>
-                    {% endif %}
+
+                        <div class="col-lg-5">
+                            <div class="liveness-panel h-100">
+                                <h2 class="h5 mb-3">Liveness Check</h2>
+                                <p id="statusText" class="text-muted mb-4">
+                                    Camera access is required to begin the verification.
+                                </p>
+
+                                <div id="livenessSteps">
+                                    <div class="liveness-step">
+                                        <strong>Step 1</strong>
+                                        <div class="text-muted small mt-1">Blink</div>
+                                    </div>
+                                    <div class="liveness-step">
+                                        <strong>Step 2</strong>
+                                        <div class="text-muted small mt-1">Turn your head left</div>
+                                    </div>
+                                    <div class="liveness-step">
+                                        <strong>Step 3</strong>
+                                        <div class="text-muted small mt-1">Turn your head right</div>
+                                    </div>
+                                </div>
+
+                                <div id="livenessMetrics" class="small text-muted mt-3">
+                                    Waiting for face landmarks...
+                                </div>
+
+                                <div class="small text-muted mt-4">
+                                    Tips: keep your full face visible, make sure the room is well lit, and avoid sudden movements.
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </form>
             </div>
         </div>
@@ -39,44 +148,165 @@
 {% endblock %}
 
 {% block extra_scripts %}
+<script id="registration-flags" type="application/json">
+    {{ {"photoAlreadyExists": photo_exists}|tojson }}
+</script>
 <script>
+    const registrationForm = document.getElementById("registrationForm");
     const video = document.getElementById("video");
     const canvas = document.getElementById("canvas");
     const context = canvas.getContext("2d");
+    const statusText = document.getElementById("statusText");
+    const livenessBadge = document.getElementById("livenessBadge");
+    const captureButton = document.getElementById("captureButton");
+    const stepsContainer = document.getElementById("livenessSteps");
+    const metricsBox = document.getElementById("livenessMetrics");
+    const registrationFlags = JSON.parse(
+        document.getElementById("registration-flags").textContent
+    );
+    const photoAlreadyExists = registrationFlags.photoAlreadyExists;
 
-    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-        navigator.mediaDevices.getUserMedia({ video: true }).then(function (stream) {
-            video.srcObject = stream;
-            video.play();
+    let analysisInProgress = false;
+    let livenessCompleted = photoAlreadyExists;
+    let currentState = null;
+    let analysisTimer = null;
+
+    async function postJson(url, payload = {}) {
+        const response = await fetch(url, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
         });
+
+        const data = await response.json();
+        if (!response.ok) {
+            throw new Error(data.message || "Request failed.");
+        }
+
+        return data;
     }
 
-    function capturePhoto() {
-        const userName = document.getElementById("name").value.trim();
-        const surname = document.getElementById("surname").value.trim();
+    function renderLivenessState(state) {
+        currentState = state;
+        statusText.textContent = state.message;
 
-        if (!userName || !surname) {
-            alert("Будь ласка, перевірте ПІБ та ім'я для ідентифікації.");
+        if (state.completed) {
+            livenessCompleted = true;
+            livenessBadge.textContent = "Liveness passed";
+            livenessBadge.classList.add("ready");
+            if (captureButton) {
+                captureButton.disabled = false;
+            }
+            if (analysisTimer) {
+                clearInterval(analysisTimer);
+            }
+        } else {
+            livenessBadge.textContent = `Step ${state.step_index + 1} of ${state.steps.length}`;
+        }
+
+        if (state.metrics?.eye_ratio !== undefined) {
+            metricsBox.textContent = `Blink metric (EAR): ${state.metrics.eye_ratio}`;
+        } else if (state.metrics?.head_turn_offset !== undefined) {
+            metricsBox.textContent = `Head turn offset: ${state.metrics.head_turn_offset}`;
+        } else {
+            metricsBox.textContent = "Waiting for face landmarks...";
+        }
+
+        stepsContainer.innerHTML = state.steps.map((step, index) => {
+            let className = "liveness-step";
+            if (index < state.step_index || state.completed) {
+                className += " done";
+            } else if (index === state.step_index) {
+                className += " active";
+            }
+
+            return `
+                <div class="${className}">
+                    <strong>Step ${index + 1}</strong>
+                    <div class="text-muted small mt-1">${step.label}</div>
+                </div>
+            `;
+        }).join("");
+    }
+
+    async function startCamera() {
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+            statusText.textContent = "Your browser does not support camera access.";
+            return false;
+        }
+
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+            video.srcObject = stream;
+            await video.play();
+            return true;
+        } catch (error) {
+            statusText.textContent = "Camera access was denied. Please allow the camera and reload the page.";
+            return false;
+        }
+    }
+
+    async function analyzeCurrentFrame() {
+        if (analysisInProgress || livenessCompleted || video.readyState < 2) {
+            return;
+        }
+
+        analysisInProgress = true;
+        context.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+        try {
+            const state = await postJson(registrationForm.dataset.checkUrl, {
+                photo_data: canvas.toDataURL("image/jpeg", 0.9)
+            });
+            renderLivenessState(state);
+        } catch (error) {
+            statusText.textContent = error.message;
+        } finally {
+            analysisInProgress = false;
+        }
+    }
+
+    async function initializeLivenessFlow() {
+        if (photoAlreadyExists) {
+            livenessBadge.textContent = "Photo already saved";
+            livenessBadge.classList.add("ready");
+            statusText.textContent = "A photo is already stored for this account.";
+            return;
+        }
+
+        const cameraReady = await startCamera();
+        if (!cameraReady) {
+            return;
+        }
+
+        try {
+            const initialState = await postJson(registrationForm.dataset.startUrl);
+            renderLivenessState(initialState);
+            analysisTimer = setInterval(analyzeCurrentFrame, 300);
+        } catch (error) {
+            statusText.textContent = error.message;
+        }
+    }
+
+    async function capturePhoto() {
+        if (!livenessCompleted) {
+            alert("Please complete the liveness check before saving your photo.");
             return;
         }
 
         context.drawImage(video, 0, 0, canvas.width, canvas.height);
-        const photo = canvas.toDataURL("image/jpeg");
 
-        fetch("{{ url_for('student.save_photo') }}", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                photo_data: photo,
-                user_name: userName,
-                surname: surname
-            })
-        }).then((response) => {
-            if (response.ok) {
-                alert("Фото збережено успішно");
-                window.location.reload();
-            }
-        });
+        try {
+            const response = await postJson(registrationForm.dataset.saveUrl, {
+                photo_data: canvas.toDataURL("image/jpeg", 0.95)
+            });
+            alert(response.message || "Photo saved successfully.");
+            window.location.reload();
+        } catch (error) {
+            alert(error.message);
+        }
     }
+
+    initializeLivenessFlow();
 </script>
 {% endblock %}

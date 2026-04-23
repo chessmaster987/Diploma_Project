@@ -1,23 +1,23 @@
 {% extends "teacher_base.html" %}
 
-{% block title %}Детальна відвідуваність{% endblock %}
+{% block title %}Detailed Attendance{% endblock %}
 
 {% block content %}
 <div class="row mb-4">
     <div class="col-lg-4">
         <div class="card card-soft">
             <div class="card-body">
-                <h2 class="h5 mb-3">Фільтр</h2>
+                <h2 class="h5 mb-3">Filter</h2>
                 <form action="{{ url_for('teacher.check_attendance_detailed', id=id) }}" method="post">
                     <div class="form-group">
-                        <label for="year_of_grade">Курс</label>
+                        <label for="year_of_grade">Year</label>
                         <select class="form-control" name="year_of_grade" id="year_of_grade">
                             {% for year in range(1, 7) %}
                                 <option value="{{ year }}">{{ year }}</option>
                             {% endfor %}
                         </select>
                     </div>
-                    <button class="btn btn-primary btn-block">Пошук</button>
+                    <button class="btn btn-primary btn-block">Search</button>
                 </form>
             </div>
         </div>
@@ -30,11 +30,11 @@
             <table class="table table-striped mb-0">
                 <thead>
                     <tr>
-                        <th>Логін</th>
-                        <th>ПІБ</th>
-                        <th>Група</th>
-                        <th>Курс</th>
-                        <th>Дата та час</th>
+                        <th>Username</th>
+                        <th>Full Name</th>
+                        <th>Group</th>
+                        <th>Year</th>
+                        <th>Date and Time</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -48,7 +48,7 @@
                     </tr>
                 {% else %}
                     <tr>
-                        <td colspan="5" class="text-muted">Спочатку оберіть курс для пошуку.</td>
+                        <td colspan="5" class="text-muted">Select a year to view attendance records.</td>
                     </tr>
                 {% endfor %}
                 </tbody>
