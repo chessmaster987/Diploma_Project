@@ -1,17 +1,17 @@
 {% extends "teacher_base.html" %}
 
-{% block title %}Відвідування{% endblock %}
+{% block title %}Attendance{% endblock %}
 
 {% block content %}
 <div class="card card-soft">
     <div class="card-body">
-        <h2 class="h5 mb-3">Оберіть групу</h2>
+        <h2 class="h5 mb-3">Select a Group</h2>
         <div class="table-responsive">
             <table class="table table-striped mb-0">
                 <thead>
                     <tr>
-                        <th>ID групи</th>
-                        <th>Назва групи</th>
+                        <th>Group ID</th>
+                        <th>Group Name</th>
                         <th></th>
                     </tr>
                 </thead>
@@ -21,7 +21,7 @@
                         <td>{{ class[0] }}</td>
                         <td>{{ class[1] }}</td>
                         <td>
-                            <a href="{{ url_for('teacher.check_attendance_detailed', id=class[0]) }}" class="btn btn-sm btn-secondary"><i class="bi bi-arrow-right-circle"></i> Обрати</a>
+                            <a href="{{ url_for('teacher.check_attendance_detailed', id=class[0]) }}" class="btn btn-sm btn-secondary"><i class="bi bi-arrow-right-circle"></i> Open</a>
                         </td>
                     </tr>
                 {% endfor %}

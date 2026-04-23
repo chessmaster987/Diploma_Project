@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="uk">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Авторизація</title>
+    <title>Sign In</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.3.1/dist/css/bootstrap.min.css">
     <style>
         body {
@@ -26,21 +26,21 @@
     <div class="card login-card">
         <div class="card-body p-4 p-md-5">
             <div class="text-center mb-4">
-                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Логотип" style="max-width: 90px;">
-                <h1 class="h3 mt-3 mb-1">Авторизація</h1>
-                <p class="text-muted mb-0">Увійдіть у систему обліку відвідувань</p>
+                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="Logo" style="max-width: 90px;">
+                <h1 class="h3 mt-3 mb-1">Sign In</h1>
+                <p class="text-muted mb-0">Access the attendance tracking system</p>
             </div>
 
             <form method="post">
                 <div class="form-group">
-                    <label for="username">Логін</label>
+                    <label for="username">Username</label>
                     <input type="text" class="form-control" id="username" name="username" required>
                 </div>
                 <div class="form-group">
-                    <label for="password">Пароль</label>
+                    <label for="password">Password</label>
                     <input type="password" class="form-control" id="password" name="password" required>
                 </div>
-                <button type="submit" class="btn btn-primary btn-block">Увійти</button>
+                <button type="submit" class="btn btn-primary btn-block">Sign In</button>
             </form>
         </div>
     </div>

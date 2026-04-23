@@ -1,21 +1,21 @@
 {% extends "student_base.html" %}
 
-{% block title %}Мої дані{% endblock %}
+{% block title %}My Profile{% endblock %}
 
 {% block content %}
 <div class="row justify-content-center">
     <div class="col-lg-6">
         <div class="card card-soft">
             <div class="card-body p-4">
-                <h2 class="h4 mb-4">Додати інформацію про студента</h2>
+                <h2 class="h4 mb-4">Add Student Information</h2>
 
                 <form action="{{ url_for('student.add_info') }}" method="post">
                     <div class="form-group">
-                        <label for="fio">ПІБ</label>
+                        <label for="fio">Full Name</label>
                         <input type="text" class="form-control" id="fio" name="fio" required>
                     </div>
                     <div class="form-group">
-                        <label for="class">Група</label>
+                        <label for="class">Group</label>
                         <select class="form-control" name="class" id="class">
                             {% for row in class_info %}
                                 <option value="{{ row[0] }}">{{ row[1] }}</option>
@@ -23,7 +23,7 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="year_of_grade">Курс</label>
+                        <label for="year_of_grade">Year</label>
                         <select class="form-control" name="year_of_grade" id="year_of_grade">
                             {% for year in range(1, 7) %}
                                 <option value="{{ year }}">{{ year }}</option>
@@ -32,9 +32,9 @@
                     </div>
 
                     {% if not is_info_complete %}
-                        <button type="submit" class="btn btn-primary">Додати</button>
+                        <button type="submit" class="btn btn-primary">Save</button>
                     {% else %}
-                        <p class="mb-0 text-muted">Інформація вже внесена. За потреби її можна змінити в особистому кабінеті.</p>
+                        <p class="mb-0 text-muted">Your information has already been added. You can edit it in your dashboard if needed.</p>
                     {% endif %}
                 </form>
             </div>

@@ -11,21 +11,21 @@
         <div class="collapse navbar-collapse" id="studentNav">
             <ul class="navbar-nav mr-auto">
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('student.add_info') }}">Мої дані</a>
+                    <a class="nav-link" href="{{ url_for('student.add_info') }}">My Profile</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('student.registration') }}">Фото</a>
+                    <a class="nav-link" href="{{ url_for('student.registration') }}">Photo</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('student.verify_registration') }}">Перевірка</a>
+                    <a class="nav-link" href="{{ url_for('student.verify_registration') }}">Verification</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('student.attendance_history') }}">Архів</a>
+                    <a class="nav-link" href="{{ url_for('student.attendance_history') }}">History</a>
                 </li>
             </ul>
 
             <form method="post" action="{{ url_for('auth.logout') }}">
-                <button class="btn btn-outline-secondary"><i class="bi bi-box-arrow-right"></i> Вийти</button>
+                <button class="btn btn-outline-secondary"><i class="bi bi-box-arrow-right"></i> Sign Out</button>
             </form>
         </div>
     </div>

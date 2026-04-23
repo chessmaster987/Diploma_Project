@@ -11,21 +11,21 @@
         <div class="collapse navbar-collapse" id="teacherNav">
             <ul class="navbar-nav mr-auto">
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('teacher.info_student') }}">Студенти</a>
+                    <a class="nav-link" href="{{ url_for('teacher.info_student') }}">Students</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('teacher.info_classes') }}">Групи</a>
+                    <a class="nav-link" href="{{ url_for('teacher.info_classes') }}">Groups</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('teacher.check_attendance') }}">Відвідування</a>
+                    <a class="nav-link" href="{{ url_for('teacher.check_attendance') }}">Attendance</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{{ url_for('teacher.attendance_statistics') }}">Статистика</a>
+                    <a class="nav-link" href="{{ url_for('teacher.attendance_statistics') }}">Statistics</a>
                 </li>
             </ul>
 
             <form method="post" action="{{ url_for('auth.logout') }}">
-                <button class="btn btn-outline-secondary"><i class="bi bi-box-arrow-right"></i> Вийти</button>
+                <button class="btn btn-outline-secondary"><i class="bi bi-box-arrow-right"></i> Sign Out</button>
             </form>
         </div>
     </div>

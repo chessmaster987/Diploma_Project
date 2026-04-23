@@ -1,24 +1,24 @@
 {% extends "student_base.html" %}
 
-{% block title %}Архів відвідувань{% endblock %}
+{% block title %}Attendance History{% endblock %}
 
 {% block content %}
 <div class="row mb-4">
     <div class="col-lg-4">
         <div class="card card-soft fade-in">
             <div class="card-body">
-                <h2 class="h5 mb-3">Фільтр</h2>
+                <h2 class="h5 mb-3">Filter</h2>
                 <form method="post">
                     <div class="form-group">
-                        <label for="start_date">Початкова дата</label>
+                        <label for="start_date">Start Date</label>
                         <input type="text" class="form-control" id="start_date" name="start_date" required>
                     </div>
                     <div class="form-group">
-                        <label for="end_date">Кінцева дата</label>
+                        <label for="end_date">End Date</label>
                         <input type="text" class="form-control" id="end_date" name="end_date" required>
                     </div>
                     <button type="submit" class="btn btn-primary w-100">
-                        <i class="bi bi-search"></i> Показати
+                        <i class="bi bi-search"></i> Show Results
                     </button>
                 </form>
             </div>
@@ -28,14 +28,14 @@
 
 <div class="card card-soft fade-in">
     <div class="card-body">
-        <h2 class="h5 mb-3">Історія відвідувань</h2>
+        <h2 class="h5 mb-3">Attendance Log</h2>
         <div class="table-responsive">
             <table class="table table-striped mb-0">
                 <thead>
                     <tr>
                         <th>ID</th>
-                        <th>Ім'я</th>
-                        <th>Дата та час</th>
+                        <th>Username</th>
+                        <th>Date and Time</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -47,7 +47,7 @@
                         </tr>
                     {% else %}
                         <tr>
-                            <td colspan="3" class="text-muted">Немає даних для відображення.</td>
+                            <td colspan="3" class="text-muted">No attendance records found for the selected period.</td>
                         </tr>
                     {% endfor %}
                 </tbody>

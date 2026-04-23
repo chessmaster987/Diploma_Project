@@ -47,9 +47,9 @@ def student_dashboard():
         connection.close()
 
     if not student_info:
-        student_info = [("Інформація ще не внесена користувачем", "", "")]
+        student_info = [("Profile information has not been added yet", "", "")]
 
-    can_edit = student_info[0][0] != "Інформація ще не внесена користувачем"
+    can_edit = student_info[0][0] != "Profile information has not been added yet"
     return render_template(
         "student/student.html",
         username=username,
@@ -163,6 +163,34 @@ def registration():
     )
 
 
+@student_bp.route("/registration/liveness/start", methods=["POST"])
+def start_liveness():
+    username, redirect_response = require_student_session()
+    if redirect_response:
+        return redirect_response
+
+    return jsonify(face_service.start_liveness_session(username))
+
+
+@student_bp.route("/registration/liveness/status", methods=["GET"])
+def liveness_status():
+    username, redirect_response = require_student_session()
+    if redirect_response:
+        return redirect_response
+
+    return jsonify(face_service.get_liveness_status(username))
+
+
+@student_bp.route("/registration/liveness/check", methods=["POST"])
+def check_liveness():
+    username, redirect_response = require_student_session()
+    if redirect_response:
+        return redirect_response
+
+    data = request.get_json()
+    return jsonify(face_service.analyze_liveness_frame(username, data["photo_data"]))
+
+
 @student_bp.route("/authorization", methods=["GET", "POST"])
 def authorization():
     return redirect(url_for("student.verify_registration"))
@@ -194,12 +222,15 @@ def video_feed_with_faces():
 
 @student_bp.route("/save_photo", methods=["POST"])
 def save_photo():
-    _, redirect_response = require_student_session()
+    username, redirect_response = require_student_session()
     if redirect_response:
         return redirect_response
 
     data = request.get_json()
-    photo_path = face_service.save_photo(data["photo_data"], data["user_name"])
+    if not face_service.is_liveness_complete(username):
+        return jsonify({"message": "Complete the liveness check before saving your photo."}), 400
+
+    photo_path = face_service.save_photo(data["photo_data"], username)
     return jsonify({"message": "Photo saved successfully", "photo_path": photo_path})
 
 
