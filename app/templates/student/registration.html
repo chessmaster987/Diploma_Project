@@ -282,7 +282,7 @@
         try {
             const initialState = await postJson(registrationForm.dataset.startUrl);
             renderLivenessState(initialState);
-            analysisTimer = setInterval(analyzeCurrentFrame, 300);
+            analysisTimer = setInterval(analyzeCurrentFrame, 180);
         } catch (error) {
             statusText.textContent = error.message;
         }

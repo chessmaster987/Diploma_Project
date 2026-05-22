@@ -86,6 +86,9 @@ class FaceRecognitionService:
             "message": f"Step 1 of {len(steps)}: {steps[0]['label']}",
             "blink_ready": False,
             "blink_closed": False,
+            "blink_baseline": None,
+            "blink_lowest_ratio": None,
+            "blink_closed_frames": 0,
             "metrics": {},
         }
 
@@ -176,17 +179,40 @@ class FaceRecognitionService:
             left_ear = self._eye_aspect_ratio(landmarks["left_eye"])
             right_ear = self._eye_aspect_ratio(landmarks["right_eye"])
             avg_ear = (left_ear + right_ear) / 2
-            session["metrics"] = {"eye_ratio": round(float(avg_ear), 3)}
+            blink_baseline = session.get("blink_baseline")
+            if blink_baseline is None:
+                blink_baseline = avg_ear
+            elif not session["blink_closed"] and avg_ear >= blink_baseline * 0.9:
+                blink_baseline = (blink_baseline * 0.75) + (avg_ear * 0.25)
 
-            if avg_ear > 0.215:
+            session["blink_baseline"] = blink_baseline
+            session["blink_lowest_ratio"] = (
+                avg_ear
+                if session["blink_lowest_ratio"] is None
+                else min(session["blink_lowest_ratio"], avg_ear)
+            )
+
+            closed_threshold = min(0.2, blink_baseline - max(0.015, blink_baseline * 0.14))
+            reopened_threshold = blink_baseline - max(0.008, blink_baseline * 0.06)
+
+            session["metrics"] = {
+                "eye_ratio": round(float(avg_ear), 3),
+                "blink_baseline": round(float(blink_baseline), 3),
+                "closed_threshold": round(float(closed_threshold), 3),
+            }
+
+            if avg_ear >= reopened_threshold:
                 session["blink_ready"] = True
-            elif session["blink_ready"] and avg_ear < 0.185:
+                if session["blink_closed"] and session["blink_closed_frames"] >= 1:
+                    session["blink_ready"] = False
+                    session["blink_closed"] = False
+                    session["blink_closed_frames"] = 0
+                    session["blink_lowest_ratio"] = None
+                    self._complete_liveness_step(session)
+                    return self.get_liveness_status(username)
+            elif session["blink_ready"] and avg_ear <= closed_threshold:
                 session["blink_closed"] = True
-            elif session["blink_ready"] and session["blink_closed"] and avg_ear > 0.205:
-                session["blink_ready"] = False
-                session["blink_closed"] = False
-                self._complete_liveness_step(session)
-                return self.get_liveness_status(username)
+                session["blink_closed_frames"] += 1
 
             session["message"] = "Step 1 of 3: Blink once."
             return self.get_liveness_status(username)
